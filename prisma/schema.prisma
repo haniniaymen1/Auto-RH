@@ -1,0 +1,1125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Fiche de paie importée depuis Sage (PDF)
+model Payslip {
+  id           String   @id @default(cuid())
+  fileName     String // Nom original du fichier
+  // NOUVEAU : la contrainte @unique est retirée car un PDF multi-fiches
+  // (plusieurs fiches de paie dans UN SEUL fichier) produit PLUSIEURS
+  // enregistrements pointant vers le MÊME fichier stocké.
+  storedName   String // Nom du fichier stocké sur disque
+  fileSize     Int // Taille en octets
+  content      String // Texte extrait du PDF (utilisé pour la recherche par CIN)
+  normalizedContent String // Texte normalisé (majuscules, sans espaces) pour recherche robuste
+  cin          String? // CIN détecté dans le contenu
+  employeeName String? // Nom de l'employé détecté
+  period       String? // Période de paie détectée
+  netSalary    String? // Net à payer détecté
+  matricule    String? // Matricule employé détecté
+  pageNumber   Int      @default(1) // Nombre de pages du PDF
+  // NOUVEAU : page de DÉBUT de cette fiche quand le PDF contient plusieurs
+  // fiches (1 fiche par page ou plus). null = PDF mono-fiche (comportement
+  // historique inchangé). Permet à la redétection de relire la BONNE page.
+  sourcePage   Int?
+  uploadedAt   DateTime @default(now())
+
+  // NOUVEAU (Task 99) — INDEX DE RECHERCHE DÉTERMINISTE (pagination serveur
+  // et recherche CIN côté serveur, volumes jusqu'à 240 000 fiches) :
+  // les champs sensibles (cin, content…) sont chiffrés à IV ALÉATOIRE
+  // (Task 32) : aucune recherche SQL n'y est possible. Ces colonnes
+  // DÉRIVÉES, chiffrées en mode DÉTERMINISTE (encbd1d:, même valeur = même
+  // empreinte — même mécanisme que PortalAccess.cin), permettent les
+  // recherches par ÉGALITÉ directement en SQL, indexées.
+  //   cinIndex     = chiffrement déterministe de normalizeQuery(cin) ;
+  //   nomIndex     = chiffrement déterministe de employeeName (dédoublonnage
+  //                  statistique sans déchiffrer toute la table) ;
+  //   cinIndexedAt = horodatage du passage de l'indexeur (null = fiche pas
+  //                  encore indexée → repli de recherche par déchiffrement).
+  // AUCUNE valeur en clair : le CIN et le nom restent illisibles dans le
+  // fichier de base. Alimentées automatiquement à l'écriture (middleware
+  // src/lib/db.ts) et par POST /api/payslips/indexation pour l'existant.
+  cinIndex     String?
+  nomIndex     String?
+  cinIndexedAt DateTime?
+
+  // NOUVEAU (Task 244) — COPIE SIGNÉE FIGÉE : PRÉSERVATION DE LA SIGNATURE
+  // D'ORIGINE (demande : « les fiches de paie déjà signées conservent leur
+  // signature électronique d'origine ; la nouvelle signature ne s'applique
+  // qu'aux nouvelles fiches ; aucun document déjà signé n'est modifié ni
+  // re-signé automatiquement »). La PREMIÈRE signature servie d'une fiche
+  // (tampon visuel et/ou PAdES) est conservée UNE FOIS pour toutes dans
+  // storage/copies-signees/ (chiffrée AES-256-GCM, 0600) et réservée
+  // TELLE QUELLE par les trois points de service (administration, portail
+  // employé, vérification QR) — modifier ou remplacer la signature dans les
+  // paramètres (image, position, QR, cachet, certificat…) N'AUCUN effet sur
+  // les fiches déjà signées ; seules les fiches pas ENCORE signées reçoivent
+  // la signature active au moment de leur première signature.
+  //   copieSigneeNom       : nom du fichier figé (« copie-<id> ») ;
+  //   copieSigneeEmpreinte : SHA-256 du contenu figé (contrôle d'intégrité) ;
+  //   copieSigneeNature    : "PADES" (signature cryptographique) | "TAMPON"
+  //                          (signature visuelle seule) ;
+  //   copieSigneeLe        : horodatage du figeage (= signature d'origine).
+  // null = fiche pas encore signée (elle sera signée puis figée au premier
+  // servage signé — import, rattrapage ou consultation).
+  copieSigneeNom       String?
+  copieSigneeEmpreinte String?
+  copieSigneeNature    String?
+  copieSigneeLe        DateTime?
+
+  // NOUVEAU (Task 99) : jetons de recherche extraits du CONTENU (numéros de
+  // type CIN présents dans le texte OCR), chiffrés déterministes → la
+  // recherche par CIN « dans le contenu » reste possible en SQL même quand
+  // le champ cin détecté diffère (page multi-employés).
+  cinTokens PayslipCinToken[]
+
+  // NOUVEAU (v0.2.50) — DÉTECTION AUTOMATIQUE DES ERREURS / INCOHÉRENCES
+  // DANS LE NOM ET LE PRÉNOM (demande utilisateur). Rempli à CHAQUE import :
+  // le nom extrait de la fiche est comparé (1) aux fiches EXISTANTES du même
+  // CIN (même lot ou historique) — ordre inversé, probable faute de frappe,
+  // nom différent — et (2) à des contrôles de format (nom manquant, un seul
+  // mot, chiffres dans le nom). Texte lisible multi-lignes ; null = aucune
+  // anomalie. CHIFFRÉ à IV aléatoire (carte db-crypto) comme employeeName :
+  // aucun nom en clair dans le fichier de base.
+  anomalieNom String?
+
+  @@index([cinIndex])
+  @@index([nomIndex])
+  @@index([cinIndexedAt])
+  @@index([uploadedAt])
+}
+
+// NOUVEAU (Task 99) : un jeton de recherche CIN par (fiche, numéro candidat).
+// Supprimés en cascade avec leur fiche. Chiffrés déterministes (encbd1d:).
+model PayslipCinToken {
+  id        String  @id @default(cuid())
+  payslipId String
+  payslip   Payslip @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+  token     String
+
+  @@unique([payslipId, token])
+  @@index([token])
+}
+
+// Utilisateur autorisé de l'application (RH ou Informatique)
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String // Format: scrypt:salt:hash
+  role         String    @default("RH") // "RH" | "IT"
+  isActive     Boolean   @default(true) // désactivation sans suppression
+  // NOUVEAU (Task 64) : date du DERNIER changement de mot de passe.
+  // null = jamais changé depuis l'ajout de cette règle => mot de passe considéré
+  // EXPIRÉ => changement OBLIGATOIRE à la prochaine connexion (politique 15 jours,
+  // appliquée à TOUS les comptes : RH, IT et superadministrateur).
+  passwordChangedAt DateTime?
+  createdAt    DateTime  @default(now())
+  // NOUVEAU (v0.2.129 — demande utilisateur) : VALIDITÉ DE 15 MINUTES du mot
+  // de passe initial des comptes IT/RH. Date d'expiration du mot de passe
+  // initial attribué par le SuperAdmin (création ou réactivation) :
+  //   - null => mot de passe « normal » (aucune expiration courte) ;
+  //   - future => compte EN ATTENTE D'ACTIVATION (pas encore de connexion) ;
+  //   - passée sans connexion => compte AUTOMATIQUEMENT DÉSACTIVÉ (balayage
+  //     périodique src/instrumentation.ts + contrôle paresseux au login) et
+  //     l'ancien mot de passe n'est plus accepté.
+  passwordExpiresAt DateTime?
+  // NOUVEAU (v0.2.129) : horodatage de l'ACTIVATION du compte = première
+  // connexion réussie avec le mot de passe initial dans le délai de 15 min.
+  // null = jamais connecté (compte non activé).
+  activatedAt  DateTime?
+  // NOUVEAU (v0.2.129 — demande utilisateur) : case à cocher « Manager ».
+  // true = ce compte est un MANAGER : il apparaît automatiquement dans la
+  // liste déroulante « Manager responsable » du formulaire de création.
+  isManager    Boolean   @default(false)
+  // NOUVEAU (v0.2.129 — demande utilisateur) : manager responsable du compte
+  // (choisi dans la liste déroulante alimentée par les comptes « Manager »).
+  managerId    String?
+  manager      User?     @relation("ResponsabiliteManagers", fields: [managerId], references: [id], onDelete: SetNull)
+  subordonnes  User[]    @relation("ResponsabiliteManagers")
+  // NOUVEAU (v0.2.129) : historique de TOUS les mots de passe attribués à ce
+  // compte — le SuperAdmin ne peut JAMAIS réattribuer un ancien mot de passe
+  // (unicité vérifiée à la création, à la réactivation et à la réinitialisation).
+  historiqueMotsDePasse PasswordHistory[]
+
+  @@index([managerId])
+}
+
+// NOUVEAU (v0.2.129 — demande utilisateur) : HISTORIQUE DES MOTS DE PASSE.
+// Chaque mot de passe attribué à un compte (initial à la création, nouveau à
+// la réactivation, réinitialisation manuelle, changement personnel) y est
+// enregistré HACHÉ (scrypt, format « scrypt:salt:hash ») : la génération d'un
+// nouveau mot de passe vérifie qu'il est DIFFÉRENT de tous les précédents.
+model PasswordHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hash       String // Format: scrypt:salt:hash
+  attribueLe DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Journal des imports (traçabilité des uploads Sage)
+model ImportLog {
+  id          String   @id @default(cuid())
+  fileName    String
+  status      String // SUCCESS | ERROR
+  message     String?
+  cinDetected String?
+  fileSize    Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+// Accès au portail employé (MODIFIÉ Task 64) : la connexion se fait par
+// CIN + MOT DE PASSE. Le RH/IT crée l'accès avec un MOT DE PASSE INITIAL
+// affiché UNE SEULE fois ; l'employé est OBLIGÉ de choisir son propre mot de
+// passe à la première connexion, puis de le CHANGER TOUS LES 15 JOURS.
+// (Historique Task 18 : l'accès était par secret TOTP/QR code — champ
+// totpSecret conservé en optionnel pour les anciens accès, sans utilité.)
+model PortalAccess {
+  id             String    @id @default(cuid())
+  cin            String    @unique // CIN de l'employé autorisé (clé d'accès)
+  // (MODIFIÉ Task 64) le secret TOTP devient OPTIONNEL : la connexion au portail
+  // se fait désormais par CIN + MOT DE PASSE. Les anciens accès créés par QR
+  // code gardent leur secret en base (inutilisé), les nouveaux accès n'en ont plus.
+  totpSecret     String?
+  // NOUVEAU (Task 64) : mot de passe de l'employé — haché scrypt
+  // (format « scrypt:salt:hash », même schéma que les comptes RH/IT) puis
+  // CHIFFRÉ en base (AES-256-GCM, champ « alea » de la carte de chiffrement).
+  // null = accès créé avant la Task 64 et pas encore réinitialisé par le RH/IT :
+  // l'employé doit demander une RÉINITIALISATION (bouton de l'onglet Accès portail).
+  passwordHash   String?
+  // NOUVEAU (Task 64) : changement OBLIGATOIRE à la prochaine connexion.
+  // true = l'employé possède un MOT DE PASSE INITIAL (à usage unique) fourni
+  // par le RH/IT : à la première connexion, le portail l'oblige à choisir son
+  // propre mot de passe. La réinitialisation par le RH/IT remet ce flag à true.
+  mustChangePassword Boolean @default(false)
+  // NOUVEAU (Task 64) : date du DERNIER changement de mot de passe.
+  // null = jamais changé => considéré EXPIRÉ. Sinon, expiration automatique
+  // au bout de 15 jours => changement OBLIGATOIRE à la prochaine connexion.
+  passwordChangedAt  DateTime?
+  isActive       Boolean   @default(true) // désactivation sans suppression
+  // NOUVEAU (Task 80) : verrou d'AFFICHAGE du QR code d'inscription.
+  // false = le QR code (page « uniquement le QR ») n'a JAMAIS été affiché à
+  // cet employé dans le portail — il s'affichera à sa prochaine validation
+  // CIN + mot de passe SI la première connexion n'est pas encore complétée.
+  // Posé à true quand la page QR est servie (GET /otp en mode première
+  // connexion) : le QR n'apparaît qu'UNE SEULE fois (demande utilisateur Task
+  // 75/76). La RÉINITIALISATION du QR par le RH/IT (onglet Accès portail,
+  // Task 80) remet le flag à false avec un NOUVEAU secret.
+  qrPresente     Boolean   @default(false)
+  // NOUVEAU (Task 86) : horodatage du secret TOTP de FENÊTRE (inscription non
+  // confirmée). Demande utilisateur : « Qr code n'expire pas apres 10 minute
+  // vérifier » — tant que la première connexion n'est pas COMPLÈTE
+  // (lastLoginAt null), le secret encodé par le QR code est une FENÊTRE de
+  // 10 minutes : il est RÉGÉNÉRÉ à chaque nouvelle fenêtre (l'ancien QR
+  // scanné devient DÉFINITIVEMENT inutilisable) et n'est SCELLÉ (champ
+  // repassé à null — le secret devient définitif) que par la CONFIRMATION du
+  // code OTP. null = secret définitif (employé inscrit, ou réinitialisé par
+  // reset-qr). La fenêtre du QR affiché et la validité du secret expirent
+  // ENSEMBLE, à otpFenetreCreeA + 10 minutes.
+  otpFenetreCreeA DateTime?
+  // NOUVEAU (Task 92) : COPIE CHIFFRÉE du MOT DE PASSE INITIAL, conservée
+  // UNIQUEMENT tant que ce mot de passe initial reste VALABLE (l'employé n'a
+  // pas encore choisi le sien : mustChangePassword = true). Elle permet au
+  // service « Send Mail » d'inclure le mot de passe initial dans l'e-mail
+  // envoyé au destinataire désigné par le RH/IT — sans jamais le stocker en
+  // clair (AES-256-GCM, carte « initialPasswordEnc » de db-crypto). Il est
+  // EFFACÉ dès que l'employé choisit son propre mot de passe (l'ancien
+  // n'existe plus) ; la RÉINITIALISATION (RH/IT) écrit la nouvelle copie.
+  initialPasswordEnc String?
+  // NOUVEAU (Task 92) : traçabilité du DERNIER e-mail « Send Mail » envoyé
+  // pour cet accès (destinataire chiffré + date) — affichée au RH/IT.
+  mailEnvoyeA    String?
+  mailEnvoyeLe   DateTime?
+  // NOUVEAU (Task 116) : adresse e-mail DE NOTIFICATION de l'employé (chiffrée
+  // AES-256-GCM, carte PortalAccess) — renseignée par l'employé dans la section
+  // « Demandes administratives » du portail. Sert à l'envoyer automatiquement
+  // aux notifications de suivi (acceptée / refusée / information requise) de
+  // SES demandes. null = pas encore renseignée : le portail le propose.
+  email          String?
+  // NOUVEAU (Task 173) : NOM ET PRÉNOM de l'employé — colonne « Nom et
+  // prénom » du tableau « Accès Portail par mot de passe ». Modifiable
+  // directement par le RH depuis cette interface ; la modification est
+  // répercutée AUTOMATIQUEMENT dans les données de l'employé (toutes les
+  // fiches de paie du même CIN). CHIFFRÉ à IV aléatoire (carte PortalAccess
+  // de db-crypto) comme les autres champs sensibles. null = nom non défini
+  // sur l'accès (l'affichage replie alors sur le nom des fiches du CIN).
+  nomPrenom      String?
+  // NOUVEAU (v0.2.106 — demande utilisateur, point 2) : NOM et PRÉNOM
+  // SÉPARÉS — le tableau « Accès Portail par mot de passe » affiche désormais
+  // DEUX colonnes distinctes (« Nom » / « Prénom »). Modifiables directement
+  // par le RH (formulaire d'édition à deux champs) ; la modification est
+  // répercutée AUTOMATIQUEMENT dans les données de l'employé (toutes les
+  // fiches de paie du même CIN — nom complet reconstitué) et dans nomPrenom
+  // (sync, compatibilité portail employé / demandes Task 175). CHIFFRÉS à IV
+  // aléatoire (carte PortalAccess de db-crypto) comme nomPrenom. null = non
+  // défini (accès historiques créés avant la séparation : la colonne « Nom »
+  // affiche alors l'ancienne valeur combinée nomPrenom, « Prénom » affiche —).
+  nom            String?
+  prenom         String?
+  // NOUVEAU (v0.2.107 — demande utilisateur) : MATRICULE EMPLOYÉ — colonne
+  // « Matricule » du tableau « Accès Portail par mot de passe ». AUTO-ASSOCIÉ
+  // depuis les fiches de paie du même CIN (matricule extrait à l'import) et
+  // MODIFIABLE par le RH comme le nom / prénom / e-mail (crayon) : la valeur
+  // saisie est répercutée dans TOUTES les fiches du CIN. Priorité d'affichage :
+  // valeur manuelle de l'accès, sinon matricule de la fiche la plus récente
+  // (résolveur src/lib/matricule.ts — utilisé aussi par les demandes et les
+  // e-mails). CHIFFRÉ à IV aléatoire (carte PortalAccess de db-crypto).
+  // null = aucune valeur manuelle : l'affichage replie sur l'auto-association.
+  matricule      String?
+  lastUsedWindow Int? // (historique OTP) dernière fenêtre TOTP consommée
+  failedAttempts Int       @default(0) // échecs consécutifs (anti force-brute)
+  lockedUntil    DateTime? // verrouillage temporaire après trop d'échecs
+  lastLoginAt    DateTime? // dernière connexion réussie au portail
+  createdAt      DateTime  @default(now())
+  // NOUVEAU (v0.2.131 — demande utilisateur) : désignation MANAGER côté
+  // ACCÈS PORTAIL (employé). La case à cocher « Manager » de la fenêtre
+  // « Mot de passe initial — CIN » marque cet employé comme manager : il
+  // rejoint AUTOMATIQUEMENT la liste déroulante « Manager responsable »
+  // proposée pour les AUTRES employés (mise à jour au fur et à mesure des
+  // désignations — la liste de l'interface est recalculée après chaque
+  // enregistrement). false = employé simple (hors liste des managers).
+  isManager      Boolean   @default(false)
+  // NOUVEAU (v0.2.131) : le MANAGER RESPONSABLE de cet employé — un AUTRE
+  // accès portail coché « Manager » (auto-rélation ; supprimé en cascade
+  // douce : SetNull si le manager disparaît). null = aucun responsable.
+  managerId      String?
+  manager        PortalAccess?  @relation("ResponsabiliteManagersPortail", fields: [managerId], references: [id], onDelete: SetNull)
+  responsablesDe PortalAccess[] @relation("ResponsabiliteManagersPortail")
+
+  @@index([managerId])
+}
+
+// NOUVEAU (Task 92) — CONFIGURATION DU SERVICE D'ENVOI D'E-MAILS (singleton,
+// ligne unique id="smtp") : le RH/IT renseigne son serveur SMTP (Gmail ou
+// autre) depuis l'onglet « Accès portail » pour envoyer les identifiants
+// d'accès (CIN + mot de passe initial + adresse du serveur + port + URL du
+// portail) par e-mail à l'employé — bouton « Send Mail » de chaque ligne.
+// Les champs sensibles (compte d'envoi, mot de passe d'application) sont
+// CHIFFRÉS en base (AES-256-GCM, carte MailConfig de db-crypto) et le mot de
+// passe n'est JAMAIS renvoyé à l'interface (booléen hasPassword seulement).
+model MailConfig {
+  id             String   @id @default("smtp")
+  host           String   @default("") // hôte SMTP (ex. smtp.gmail.com)
+  port           Int      @default(587) // port SMTP (465 SSL/TLS, 587 STARTTLS)
+  secure         Boolean  @default(false) // true = SSL/TLS direct (465), false = STARTTLS (587)
+  username       String? // compte d'envoi (adresse e-mail complète) — CHIFFRÉ
+  password       String? // mot de passe / mot de passe d'application — CHIFFRÉ, jamais renvoyé
+  from           String   @default("") // expéditeur affiché (ex. Service RH <rh@entreprise.tn>)
+  // Corps de l'e-mail : adresse IP ou nom DNS du serveur, port du site web
+  // et adresse d'accès au portail (pré-remplis depuis la requête, modifiables).
+  serveurAdresse String   @default("")
+  sitePort       String   @default("")
+  portailUrl     String   @default("")
+  // NOUVEAU (Task 116) — routage des DEMANDES ADMINISTRATIVES :
+  //  - rhEmail : boîte du SERVICE RH destinataire des demandes d'attestation
+  //    de travail et d'attestation de salaire ;
+  //  - itEmail : boîte du service INFORMATIQUE pour les notifications
+  //    techniques (optionnel) ;
+  //  - responsablesMap : adresses des RESPONSABLES concernés par les
+  //    autorisations de sortie, une par ligne « DEPARTEMENT=email » ; la
+  //    ligne spéciale « DEFAUT=email » reçoit les départements sans ligne.
+  //    (Les demandes de congé visent le N+1 SAISI par l'employé dans le
+  //    formulaire — pas de configuration ici ; depuis la v0.2.49, les
+  //    demandes de PARRAINAGE partent vers parrainageEmail ci-dessous.)
+  //    Ces adresses de ROUTAGE restent en clair (comme host/from) : aucun
+  //    secret — seuls le compte et le mot de passe SMTP sont chiffrés.
+  rhEmail        String   @default("")
+  itEmail        String   @default("")
+  responsablesMap String  @default("")
+  // NOUVEAU (v0.2.49) — adresse e-mail DÉDIÉE des demandes de PARRAINAGE :
+  // différente de l'adresse utilisée pour les autres demandes, configurable
+  // depuis le portail administratif (panneau SMTP → routage). Vide = les
+  // demandes de parrainage partent au N+1 saisi par l'employé (comportement
+  // historique conservé). En clair comme les autres adresses de routage.
+  parrainageEmail String  @default("")
+  // NOUVEAU (v0.2.94, Task 197) — MAP DE CONFIGURATION DES MAILS : une
+  // adresse DÉDIÉE par type de demande, sur le modèle de parrainageEmail.
+  //  - attestationTravailEmail / attestationSalaireEmail : destinataires
+  //    PRINCIPaux des demandes d'attestation (vide = repli boîte RH) ;
+  //  - congeEmail / autorisationEmail : boîtes DÉDIÉES qui reçoivent une
+  //    COPIE systématique des demandes de congé et d'autorisation de
+  //    sortie (le N+1 saisi par l'employé reste destinataire principal ;
+  //    vide = la copie part à la boîte RH, comportement v0.2.88 conservé).
+  // En clair comme les autres adresses de routage (aucun secret), modifiables
+  // par le rôle IT et le superadministrateur (panneau SMTP → routage).
+  attestationTravailEmail String @default("")
+  attestationSalaireEmail String @default("")
+  congeEmail              String @default("")
+  autorisationEmail       String @default("")
+  // NOUVEAU (v0.2.197, demande utilisateur « en copie du responsable
+  // principal du parrainage ») — adresse qui reçoit une COPIE des demandes
+  // de PARRAINAGE en plus de l'adresse dédiée (parrainageEmail ci-dessus),
+  // qui reste destinataire PRINCIPAL pour la validation par réponse e-mail.
+  // Vide = AUCUNE copie supplémentaire (jamais de doublon du principal).
+  // En clair comme les autres adresses de routage (aucun secret).
+  parrainageCopieEmail    String @default("")
+  // NOUVEAU (Task 122) — RÉCEPTION des réponses du RH (IMAP) : le portail
+  // interroge périodiquement la BOÎTE DE RÉCEPTION du compte d'envoi pour
+  // détecter les réponses aux demandes administratives (le RH répond à
+  // l'e-mail de la demande en joignant le document demandé). Identifiants
+  // par défaut = ceux du SMTP (champs vides = même compte / même mot de
+  // passe) ; possibles SEULEMENT si le serveur de messagerie expose IMAP
+  // (Gmail : imap.gmail.com 993 SSL, Outlook : outlook.office365.com 993).
+  // Chiffrés comme username/password SMTP (carte MailConfig db-crypto).
+  imapActif      Boolean  @default(false) // interrupteur de la réception automatique
+  imapHost       String   @default("") // hôte IMAP (ex. imap.gmail.com)
+  imapPort       Int      @default(993) // port IMAP (993 SSL/TLS recommandé, 143 STARTTLS)
+  imapSecure     Boolean  @default(true) // true = SSL/TLS direct (993), false = STARTTLS (143)
+  imapUser       String?  // compte de lecture (vide = identique au SMTP) — CHIFFRÉ
+  imapPassword   String?  // mot de passe de lecture (vide = celui du SMTP) — CHIFFRÉ, jamais renvoyé
+  updatedAt      DateTime @updatedAt
+}
+
+// NOUVEAU (Task 116) — DEMANDE ADMINISTRATIVE créée depuis le portail employé
+// (4001) et traitée par le RH/IT dans l'administration (4000).
+//  - reference lisible affichée dans l'interface et les e-mails (DEM-AAAA-NNNNN) ;
+//  - type : ATTESTATION_TRAVAIL | ATTESTATION_SALAIRE | CONGE |
+//           AUTORISATION_SORTIE | PARRAINAGE ;
+//  - cin : CIN de l'employé demandeur — CHIFFRÉ DÉTERMINISTE (même mécanisme
+//          que PortalAccess.cin) : « mes demandes » se cherchent par égalité ;
+//  - statut : EN_ATTENTE | ACCEPTEE | REFUSEE | INFORMATION_REQUISE ;
+//  - donnees : JSON des champs du formulaire — CHIFFRÉ (IV aléatoire) ;
+//  - destinataire : e-mail du traiteur (RH / N+1 / responsable) — CHIFFRÉ ;
+//  - employeEmail : copie de l'e-mail de notification de l'employé au moment
+//          de la création — CHIFFRÉ (les notifications de suivi y sont
+//          envoyées même si l'employé change son e-mail plus tard).
+//  (NOUVEAU Task 122) — messageIdEnvoi : identifiant du message émis lors de
+//      la création (en-tête Message-ID) — sert à reconnaître la RÉPONSE du
+//      service RH (en-têtes In-Reply-To / References) même si le sujet est
+//      modifié ; documents : pièces jointes reçues par e-mail (relation).
+model DemandeAdministrative {
+  id            String    @id @default(cuid())
+  reference     String    @unique
+  type          String
+  cin           String
+  statut        String    @default("EN_ATTENTE")
+  destinataire  String?
+  donnees       String    @default("{}")
+  employeEmail  String?
+  commentaire   String?
+  traitePar     String?
+  traiteLe      DateTime?
+  messageIdEnvoi String?  // Message-ID de l'e-mail de création (Task 122)
+  // ==========================================================================
+  // NOUVEAU (Task 179) — DOCUMENT D'ACCEPTATION SIGNÉ & TAMPONNÉ : le PDF
+  // généré automatiquement quand la demande devient DÉFINITIVEMENT acceptée
+  // (congé : ACCEPTEE/VALIDEE ; autorisation : ACCEPTEE). Le fichier est
+  // stocké CHIFFRÉ dans storage/documents-demandes/ (même dossier que les
+  // autres documents → servi par les routes existantes : détail RH et
+  // « Mes demandes » du portail employé) et relié à la demande comme
+  // DocumentDemande (recuDe = « Génération automatique (document signé) »).
+  //   docSigneChemin       : nom du fichier stocké (null = pas encore généré)
+  //   docSigneNom          : nom affiché (ex. Acceptation_conge_DEM-2026-00042.pdf)
+  //   docSigneLe           : date de la dernière génération
+  //   docSignePar          : déclencheur (Décision RH, Réponse e-mail du manager, Renvoi manuel…)
+  //   docSigneEnvoiLe      : date du dernier envoi e-mail
+  //   docSigneDestinataires: trace des destinataires « à/cc » — CHIFFRÉ (alea)
+  //   docSigneErreur       : dernière erreur (génération ou envoi) — technique
+  // ==========================================================================
+  docSigneChemin        String?
+  docSigneNom           String?
+  docSigneLe            DateTime?
+  docSignePar           String?
+  docSigneEnvoiLe       DateTime?
+  docSigneDestinataires String?
+  docSigneErreur        String?
+  // ==========================================================================
+  // NOUVEAU (Task 180) — DOCUMENT DE REFUS SIGNÉ & TAMPONNÉ : le PDF de la
+  // DÉCISION DE REFUS, généré AUTOMATIQUEMENT quand la demande est REFUSÉE
+  // (TOUS les types : congé, autorisation, attestation de travail, attestation
+  // de salaire, parrainage — décision RH ou réponse e-mail reconnue). Même
+  // pipeline que le document d'acceptation : PDF (toutes les informations de
+  // la demande + MOTIF DU REFUS), tampon (paraphe + cachet + mention),
+  // signature électronique par le certificat configuré, stockage CHIFFRÉ
+  // (storage/documents-demandes/), DocumentDemande relié (recuDe =
+  // « Génération automatique (document de refus) »), envoi e-mail
+  // (employé À + RH + manager Cc). Champs jumeaux des docSigne* :
+  //   docRefusChemin       : nom du fichier stocké (null = pas encore généré)
+  //   docRefusNom          : nom affiché (ex. Refus_conge_DEM-2026-00042.pdf)
+  //   docRefusLe           : date de la dernière génération
+  //   docRefusPar          : déclencheur (Décision RH, Réponse e-mail…)
+  //   docRefusEnvoiLe      : date du dernier envoi e-mail
+  //   docRefusDestinataires: trace des destinataires « à/cc » — CHIFFRÉ (alea)
+  //   docRefusErreur       : dernière erreur (génération ou envoi) — technique
+  // ==========================================================================
+  docRefusChemin        String?
+  docRefusNom           String?
+  docRefusLe            DateTime?
+  docRefusPar           String?
+  docRefusEnvoiLe       DateTime?
+  docRefusDestinataires String?
+  docRefusErreur        String?
+  // ==========================================================================
+  // NOUVEAU (Task 181) — VALIDATION À DEUX ÉTAPES MANAGER → RH : les demandes
+  // de CONGÉ et d'AUTORISATION DE SORTIE sont décidées en DEUX étapes —
+  //   1) le MANAGER (N+1 / responsable du département, destinataire de
+  //      l'e-mail de la demande) décide en répondant par e-mail (reconnaissance
+  //      Task 178) ou par saisie manuelle du RH dans l'administration ;
+  //   2) le SERVICE RH décide ensuite depuis l'administration.
+  // Le STATUT FINAL suit la MATRICE (cahier des charges) :
+  //   Manager Acceptée + RH Acceptée → « Acceptée »
+  //   Manager refuse (quel que soit le RH) → « Refusée par le Manager »
+  //     (refus IMMÉDIAT : aucune transmission aux RH, e-mail de refus à
+  //     l'employé + notification du service RH) ;
+  //   Manager Acceptée + RH Refusée → « Refusée par les RH ».
+  // Champs tracés séparément pour l'affichage des TROIS colonnes
+  // (Décision Manager / Décision RH / Statut final) sans perdre l'historique :
+  //   decisionManager  : EN_ATTENTE | ACCEPTEE | REFUSEE (null = pas encore
+  //                      tracée / demandes antérieures à la Task 181) ;
+  //   decisionManagerLe / Par / Note : horodatage, acteur (« Manager (réponse
+  //                      e-mail) », « RH … (saisie pour le manager) ») et
+  //                      formulation reconnue ou commentaire ;
+  //   decisionRh / Le / Par : décision du service RH (mêmes valeurs) ;
+  //   refuseePar       : MANAGER | RH — raffine le libellé du statut REFUSEE
+  //                      (« Refusée par le Manager » / « Refusée par les RH »)
+  //                      sans créer de nouveau statut (compatibilité totale
+  //                      avec les déclencheurs Tasks 178/179/180).
+  // ==========================================================================
+  decisionManager       String?
+  decisionManagerLe     DateTime?
+  decisionManagerPar    String?
+  decisionManagerNote   String?
+  decisionRh            String?
+  decisionRhLe          DateTime?
+  decisionRhPar         String?
+  // (NOUVEAU v0.2.151 — parité RH) formulation reconnue dans la réponse
+  // e-mail des RH (jumelle de decisionManagerNote) — affichée dans le détail
+  // de la demande (« Formulation reconnue : « … » »).
+  decisionRhNote        String?
+  refuseePar            String?
+  // ==========================================================================
+  // NOUVEAU (Task 194) — HISTORIQUE DES RÉPONSES E-MAIL REÇUES : chaque
+  // réponse identifiée (expéditeur autorisé) pour cette demande est
+  // conservée — y compris les réponses AMBIGUÏES ou NON RECONNUES (le RH
+  // doit pouvoir consulter le texte ORIGINAL et décider manuellement, le
+  // statut restant « En attente »). Chaque entrée : { le (ISO), de
+  // (expéditeur), role (manager|rh), sujet, texte (corps, 4000 car. max),
+  // decision (VALIDATION|REFUS|AMBIGUE|NON_RECONNU|null), formulations,
+  // piecesJointes (noms vus), piecesJointesImportees (noms importés),
+  // statutAvant, statutApres }. Chiffré (AES-256-GCM, même mécanisme que
+  // destinataire / docSigneDestinataires) — JSON des 30 dernières entrées.
+  // ==========================================================================
+  reponsesRecues        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  documents     DocumentDemande[]
+
+  @@index([cin])
+  @@index([statut])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// NOUVEAU (Task 122) — DOCUMENT transmis par le service RH en RÉPONSE à une
+// demande administrative : le RH répond à l'e-mail de la demande en joignant
+// le document demandé (ex. Attestation_Travail.pdf) ; le portail interroge
+// la boîte de réception (IMAP), associe la pièce jointe à la demande et la
+// rend disponible à l'employé (Visualiser / Télécharger dans le portail).
+// Le fichier est stocké CHIFFRÉ sur le disque (storage/documents-demandes/,
+// même mécanisme AES-256-GCM que les fiches de paie) — seul le chemin est
+// conservé ici. Détection des doublons par empreinte SHA-256 du contenu.
+model DocumentDemande {
+  id          String   @id @default(cuid())
+  demandeId   String
+  demande     DemandeAdministrative @relation(fields: [demandeId], references: [id], onDelete: Cascade)
+  nomFichier  String   // nom d'origine assaini (affiché à l'employé et au RH)
+  chemin      String   // nom du fichier stocké (sous storage/documents-demandes/)
+  taille      Int      // taille en octets
+  typeMime    String   @default("") // type MIME détecté (application/pdf…)
+  empreinte   String   // SHA-256 du contenu (déduplication)
+  recuDe      String   @default("") // adresse e-mail expéditrice de la réponse (routage, en clair)
+  recuLe      DateTime @default(now())
+  // NOUVEAU (v0.2.51) — SHA-256 du document AVANT tampon (import direct du
+  // service RH). La dé-duplication porte sur ces octets LÀ : les octets finaux
+  // varient (mention légale datée {DATE}) alors que le RH réimporte le MÊME
+  // fichier. La réception e-mail (portail) le renseigne = empreinte (contenu
+  // brut de la pièce jointe, jamais retouchée). null = documents historiques.
+  empreinteOrigine String?
+
+  @@index([demandeId])
+  @@index([empreinte])
+}
+
+// NOUVEAU (Task 118) — Tampon automatique des fiches de paie : SIGNATURE
+// ÉLECTRONIQUE et/ou CODE QR apposés AU MOMENT DU SERVAGE (consultation et
+// téléchargement, administration 4000 ET portail employé 4001). L'original
+// stocké reste INTACT : le tampon est appliqué à la volée, ce qui permet
+// 1) de tamponner aussi les fiches déjà importées, 2) de changer la
+// configuration (image de signature, position, contenu du QR…) sans
+// toucher aux fichiers. Configuration singleton (id = "signature"),
+// rubrique « Signature électronique & QR code » de l'onglet Importation.
+model SignatureConfig {
+  id           String   @id @default("signature")
+  actif        Boolean  @default(false) // interrupteur général du tampon
+  // ---- Signature électronique (image et/ou texte) ----
+  sigActif     Boolean  @default(false)
+  sigImage     String   @default("") // dataURL PNG/JPG de la signature/cachet (non chiffré : contenu destiné à être visible sur les fiches)
+  sigTexte     String   @default("") // ligne(s) de texte sous l'image (ex. « Le Directeur des Ressources Humaines »)
+  sigPosition  String   @default("BAS_DROITE") // BAS_DROITE | BAS_GAUCHE | HAUT_DROITE | HAUT_GAUCHE
+  sigTaille    Int      @default(120) // largeur de l'image en points PDF
+  sigOpacite   Float    @default(0.9) // 0.3 → 1
+  // ---- QR code ----
+  qrActif      Boolean  @default(false)
+  qrMode       String   @default("DONNEES") // DONNEES (réf/employé/CIN/période/net/empreinte) | URL (lien de vérification) | FICHE (Task 180 : lien signé {qrUrl}/verification/fiche/{id}?t=jeton) | TEXTE (contenu libre) | IMAGE (QR fourni par l'établissement)
+  qrUrl        String   @default("") // préfixe d'URL (mode URL) — l'URL reçoit ?ref=…&cin=…&h=empreinte
+  qrTexte      String   @default("") // contenu libre (mode TEXTE)
+  qrImage      String   @default("") // dataURL PNG/JPG d'un QR FOURNI (mode IMAGE — importé, non généré)
+  qrPosition   String   @default("BAS_GAUCHE")
+  qrTaille     Int      @default(110) // côté du QR en points PDF
+  // ---- Décalages fins (NOUVEAU 0.2.47 ; LIBÉRÉS 0.2.54) : points PDF ajoutés
+  // après le calcul du coin — l'élément peut être déplacé LIBREMENT sur toute
+  // la surface de la feuille (bornes serveur ±1500 pt, le placement reste
+  // borné au périmètre de la page par coinVersBoite).
+  sigDecalX    Int      @default(0) // -1500 → +1500
+  sigDecalY    Int      @default(0)
+  qrDecalX     Int      @default(0)
+  qrDecalY     Int      @default(0)
+  // ---- Rotations (NOUVEAU 0.2.54) : angle en degrés, SENS HORAIRE,
+  // 0 → 360 (l'élément pivote autour de son propre centre ; appliqué aux
+  // 4 formats : PDF (rotation native pdf-lib), image/DOCX/XLSX (rotation
+  // cuite dans le PNG de surface). Défaut 0 = comportement historique.
+  sigRotation  Int      @default(0) // degrés horaires 0 → 360
+  qrRotation   Int      @default(0)
+  // ---- Traçabilité des images importées (NOUVEAU 0.2.58 — « Path :
+  // l'emplacement des tampons importés ») : pour chaque image de tampon
+  // importée (signature/cachet et QR fourni), le nom du FICHIER D'ORIGINE
+  // choisi par l'utilisateur et le CHEMIN du fichier de contrôle exporté
+  // sur le serveur (storage/tampons/) — affichés dans la rubrique
+  // « Signature électronique & QR code ». La source de vérité du rendu
+  // reste le dataURL en base (colonnes sigImage / qrImage) : les copies
+  // fichiers sont une trace consultable, jamais lues par le moteur.
+  sigImageNom    String   @default("") // nom du fichier d'origine (ex. cachet_direction.png)
+  sigImageChemin String   @default("") // chemin relatif de la copie exportée (storage/tampons/…)
+  qrImageNom     String   @default("") // nom du fichier d'origine du QR importé
+  qrImageChemin  String   @default("") // chemin relatif de la copie exportée (storage/tampons/…)
+  // ---- Mention légale ----
+  mentionActif Boolean  @default(true)
+  mentionTexte String   @default("Document signé électroniquement — Service RH — {DATE}") // {DATE} remplacée par la date d'apposition
+  // ---- Certificat de signature électronique (NOUVEAU Task 181) ----
+  // Import d'une signature électronique cryptographique en formats
+  // professionnels : PKCS#7/CMS (.pkcs7, .p7s, .p7m, .p7b, .p7c), XML-DSig
+  // (.xml, .ps7x), PKCS#12 (.p12, .pfx — certificat + clé privée) et
+  // certificats X.509 (.pem, .cer, .crt, .der). Le FICHIER est conservé
+  // CHIFFRÉ (AES-256-GCM, storage/tampons/certificat-…, même discipline
+  // que les images de tampon et les fiches) : un .p12/.pfx contient une clé
+  // privée qui ne doit jamais être lisible sur le disque. Seules les
+  // MÉTADONNÉES publiques extraites du certificat (titulaire, émetteur,
+  // numéro de série, validité, empreinte SHA-256) sont stockées en base
+  // pour affichage — jamais la clé privée elle-même.
+  certFormat     String    @default("") // PKCS#12 | PKCS#7 | XML-DSig | X.509
+  certFichierNom String    @default("") // nom du fichier d'origine (ex. signature.p12)
+  certChemin     String    @default("") // chemin relatif de la copie CHIFFRÉE (storage/tampons/certificat-…)
+  certSujet      String    @default("") // titulaire du certificat (CN, O, OU…)
+  certEmetteur   String    @default("") // émetteur (autorité de certification)
+  certSerie      String    @default("") // numéro de série (hexadécimal)
+  certValideDu   DateTime? // début de validité
+  certValideAu   DateTime? // fin de validité
+  certEmpreinte  String    @default("") // empreinte SHA-256 du certificat (hex)
+  certImportLe   DateTime? // date d'import du fichier
+  // ---- (NOUVEAU v0.2.99) MOT DE PASSE du certificat — stocké CHIFFRÉ ----
+  // Le mot de passe PKCS#12 éventuel est désormais CONSERVÉ par section
+  // (chiffré AES-256-GCM par le middleware db — même discipline que le mot
+  // de passe SMTP de MailConfig) : chaque section gère LE SIEN, il n'est
+  // JAMAIS renvoyé à l'interface (booléen certMotDePasseEnregistre seul).
+  certMotDePasse String    @default("")
+  // ---- (NOUVEAU v0.2.112) CLÉ PRIVÉE ASSOCIÉE — fichier séparé (.pem/.key/.der)
+  // Le certificat PEUT être importé SEUL quand la clé privée est déjà
+  // disponible dans le système (association vérifiée par appariement
+  // cryptographique sign/vérifie), ou accompagné de SA clé privée (coffre
+  // .p12/.pfx ou fichier de clé séparé). Le fichier de clé est conservé
+  // CHIFFRÉ (AES-256-GCM, storage/tampons/cle-privee-…) ; son mot de passe
+  // éventuel est CHIFFRÉ en base — jamais renvoyé à l'interface.
+  certCleChemin     String    @default("") // copie CHIFFRÉE (storage/tampons/cle-privee-…)
+  certCleFichierNom String    @default("") // nom du fichier de clé d'origine
+  certCleType       String    @default("") // type affiché (« RSA 2048 bits »)
+  certCleMotDePasse String    @default("") // CHIFFRÉ AES-256-GCM (middleware db)
+  certCleImportLe   DateTime? // date d'import du fichier de clé
+  // ---- (NOUVEAU v0.2.88) Switch ON/OFF du certificat de signature ----
+  // Interrupteur DÉDIÉ (demande utilisateur) : ON = le certificat importé est
+  // APPLIQUÉ aux documents concernés (bloc certificat dessiné sur les fiches
+  // de paie et les documents tamponnés) ; OFF = il n'est JAMAIS appliqué.
+  // Le certificat importé et ses métadonnées restent conservés : OFF ne
+  // supprime rien, il désactive seulement l'apposition.
+  certActif      Boolean   @default(false)
+  // ---- (NOUVEAU v0.2.92) POSITIONNEMENT LIBRE du bloc certificat ----
+  // Même mécanisme que la signature (sigDecalX/Y) et le QR (qrDecalX/Y) :
+  //   certPosition = coin de départ du bloc — BAS_CENTRE (DÉFAUT = rendu
+  //                  historique : centré au-dessus de la mention) ou les
+  //                  4 coins (BAS_DROITE | BAS_GAUCHE | HAUT_DROITE | HAUT_GAUCHE) ;
+  //   certDecalX/Y = décalages fins ±1500 pt (l'élément peut être déplacé
+  //                  LIBREMENT sur toute la feuille, borné au périmètre) ;
+  //   certTaille   = échelle du bloc en % (50 → 300, défaut 100 = texte
+  //                  historique 6,5 pt). Jumelle portail alignée.
+  certPosition   String    @default("BAS_CENTRE")
+  certDecalX     Int       @default(0)
+  certDecalY     Int       @default(0)
+  certTaille     Int       @default(100)
+  // ---- (NOUVEAU v0.2.119) ÉLÉMENT « SIGNATURE ÉLECTRONIQUE » DU TAMPON ----
+  // Bloc de signature électronique alimenté AUTOMATIQUEMENT par le certificat
+  // chargé dans le module de signature (SignatureApiConfig, onglet
+  // « Paramètres ») : AUCUNE réimportation du certificat n'est nécessaire.
+  // Le contenu du bloc (titulaire, organisation, émetteur, empreinte) est lu
+  // EN DIRECT à chaque apposition — il n'est JAMAIS stocké ici : la
+  // suppression/le remplacement du certificat dans le module se reflète
+  // immédiatement dans le tampon. OFF = bloc jamais apposé.
+  elecActif      Boolean   @default(false)
+  elecPosition   String    @default("BAS_DROITE")
+  elecDecalX     Int       @default(0)
+  elecDecalY     Int       @default(0)
+  elecTaille     Int       @default(100) // échelle du bloc 50 → 300 %
+  // ---- (NOUVEAU v0.2.120) FORME du cachet « Signature électronique » ----
+  // RECTANGLE = bloc encadré historique (v0.2.119) ; ROND = cachet rond de
+  // type « cachet d'entreprise » (exemple utilisateur transfernow) : deux
+  // cercles concentriques, organisation en arc supérieur, mention
+  // « SIGNATURE ÉLECTRONIQUE » en arc inférieur, titulaire (CN) en gras au
+  // centre + validité + émetteur. Même contenu, même garantie : un cachet
+  // rond n'est apposé que si la signature PAdES couvre le document.
+  elecForme      String    @default("RECTANGLE") // RECTANGLE | ROND
+  // ---- (NOUVEAU v0.2.128) CONTENU du cachet — FORMULAIRE DE CHOIX -------
+  // Demande utilisateur : ne plus afficher les informations du certificat
+  // dans le cachet, et fournir un formulaire pour CHOISIR les informations
+  // affichées. PAR DÉFAUT AUCUNE information du certificat n'est affichée :
+  // le cachet porte uniquement la mention « SIGNATURE ÉLECTRONIQUE ». Chaque
+  // interrupteur fait figurer UNE information du certificat chargé dans le
+  // module « API de certification & signature » (lecture EN DIRECT — même
+  // discipline que elecActif) ; elecTexteLibre ajoute une LIGNE
+  // PERSONNALISÉE (≤ 120 caractères, déterministe — jamais une date).
+  elecAffSignataire   Boolean @default(false) // « Signataire : » (CN du certificat)
+  elecAffOrganisation Boolean @default(false) // organisation (O du certificat)
+  elecAffEmetteur     Boolean @default(false) // « Émetteur : » (autorité de certification)
+  elecAffValidite     Boolean @default(false) // « Valide jusqu'au … » (fin de validité)
+  elecAffEmpreinte    Boolean @default(false) // « Certificat SHA-256 : … » (empreinte)
+  elecTexteLibre      String  @default("")     // ligne personnalisée du cachet (≤ 120 car.)
+  updatedAt    DateTime @updatedAt
+  // ==========================================================================
+  // NOUVEAU (Task 179) — DOCUMENT D'ACCEPTATION SIGNÉ & TAMPONNÉ : options
+  // du moteur de génération (PDF officiel, paraphe + cachet, mention,
+  // certificat, envoi e-mail employé/RH/manager). Les IMAGES (paraphe,
+  // cachet) sont stockées CHIFFRÉES (storage/tampons/…).
+  // ==========================================================================
+  docActif          Boolean  @default(true) // interrupteur de la génération automatique
+  certNom        String   @default("") // nom du fichier d'origine (affichage)
+  certImporteLe  DateTime?             // date d'import
+  certSignataire String   @default("") // nom du signataire (champ de signature PDF + bloc du document)
+  certFonction   String   @default("") // fonction / titre du signataire (ex. Directeur des Ressources Humaines)
+  docSigImage       String @default("") // dataURL PNG/JPG de la signature manuscrite
+  docSigImageNom    String @default("") // nom du fichier d'origine
+  docSigImageChemin String @default("") // copie de contrôle chiffrée (storage/tampons/)
+  docSigPosition    String @default("BAS_DROITE") // BAS_DROITE | BAS_GAUCHE | HAUT_DROITE | HAUT_GAUCHE
+  docSigTaille      Int    @default(120) // largeur en points PDF
+  tamponImage       String @default("") // dataURL PNG/JPG du tampon / cachet
+  tamponImageNom    String @default("") // nom du fichier d'origine
+  tamponImageChemin String @default("") // copie de contrôle chiffrée (storage/tampons/)
+  tamponPosition    String @default("BAS_GAUCHE")
+  tamponTaille      Int    @default(140)
+  tamponOpacite     Float  @default(0.85) // 0.3 → 1
+  docMention String @default("Document signé électroniquement — certificat configuré — Service RH — {DATE}")
+  docEmailActif     Boolean @default(true)
+  docEmailObjet     String  @default("Votre {TYPE} — {REF} : acceptée — document signé et tamponné")
+  docEmailCorps     String  @default("") // vide = corps par défaut intégré
+  docEnvoyerRh      Boolean @default(true) // copie au service RH (MailConfig.rhEmail)
+  docEnvoyerManager Boolean @default(true) // copie au manager / responsable de la demande
+
+  // ==========================================================================
+  // NOUVEAU (v0.2.143) — UNIFICATION AVEC LE SYSTÈME « IMPORT DE FICHIERS » :
+  // les documents de réponse (congé / autorisation) sont tamponnés et signés
+  // par les MÊMES moteurs, avec les MÊMES paramètres et le MÊME système de
+  // positionnement interactif (déplacer / redimensionner sur l'aperçu) que
+  // les fiches de paie — même géométrie (coin + décalages ±1500 pt bornés,
+  // tailles 40 → 1200 pt, rotations 0 → 360° horaires), même QR (5 modes),
+  // même cachet « Signature électronique » alimenté EN DIRECT par le
+  // certificat du module de signature, et signature cryptographique par LE
+  // MÊME certificat que l'importation des fiches (SignatureApiConfig,
+  // périmètre signerReponses).
+  // ==========================================================================
+  // ---- Positionnement libre du PARAPHE (signature image) ----
+  docSigDecalX   Int @default(0) // décalage fin ±1500 pt (mêmes bornes que sigDecalX fiches)
+  docSigDecalY   Int @default(0)
+  docSigRotation Int @default(0) // rotation horaire 0 → 360° (même moteur)
+  docSigSource   String @default("DEDIEE") // DEDIEE = image du panneau | IMPORT = image partagée « Import de fichiers » (sigImage)
+  // ---- Positionnement libre du TAMPON (cachet image) ----
+  tamponDecalX   Int @default(0)
+  tamponDecalY   Int @default(0)
+  tamponRotation Int @default(0)
+  tamponSource   String @default("DEDIEE") // DEDIEE | IMPORT (même image signature/cachet que les fiches)
+  // ---- QR CODE (mêmes modes que les fiches : DONNEES | URL | FICHE | TEXTE | IMAGE) ----
+  docQrActif    Boolean @default(false)
+  docQrMode     String  @default("DONNEES")
+  docQrUrl      String  @default("") // adresse de base (modes URL / FICHE — vérification publique de la réponse)
+  docQrTexte    String  @default("") // contenu libre (mode TEXTE)
+  docQrImage    String  @default("") // dataURL PNG/JPG d'un QR FOURNI (mode IMAGE, dédié aux réponses)
+  docQrImageNom String  @default("")
+  docQrPosition String  @default("BAS_GAUCHE")
+  docQrTaille   Int     @default(110) // côté du QR 40 → 1200 pt (mêmes bornes fiches)
+  docQrDecalX   Int     @default(0)
+  docQrDecalY   Int     @default(0)
+  docQrRotation Int     @default(0)
+  docQrSource   String  @default("DEDIEE") // mode IMAGE : DEDIEE | IMPORT (qrImage partagé fiches)
+  // ---- CACHET « SIGNATURE ÉLECTRONIQUE » (même système que les fiches :
+  //      alimenté EN DIRECT par le certificat du module de signature
+  //      (SignatureApiConfig), contenu déterministe, jamais stocké) ----
+  docElecActif     Boolean @default(false)
+  docElecPosition  String  @default("BAS_DROITE")
+  docElecDecalX    Int     @default(0)
+  docElecDecalY    Int     @default(0)
+  docElecTaille    Int     @default(100) // échelle du cachet 50 → 300 %
+  docElecForme     String  @default("RECTANGLE") // RECTANGLE | ROND (mêmes formes que les fiches)
+  docElecAffSignataire   Boolean @default(false)
+  docElecAffOrganisation Boolean @default(false)
+  docElecAffEmetteur     Boolean @default(false)
+  docElecAffValidite     Boolean @default(false)
+  docElecAffEmpreinte    Boolean @default(false)
+  docElecTexteLibre      String  @default("")
+  // ---- SOURCE DE LA SIGNATURE CRYPTOGRAPHIQUE ----
+  // MODULE (défaut) = LE MÊME certificat / module que l'importation des
+  // fiches de paie (SignatureApiConfig — PAdES locale, périmètre
+  // « documents des demandes/réponses ») ; DEDIE = repli historique
+  // (certificat .p12 importé dans ce panneau).
+  docCertSource String @default("MODULE")
+}
+
+// NOUVEAU (v0.2.93) — CONFIGURATION DU TAMPON DES DOCUMENTS DE RÉPONSE
+// (section « Demandes / Réponses ») — SÉPARÉE de la configuration des fiches
+// de paie (SignatureConfig, section « Import ») à la demande utilisateur :
+// chaque section dispose de SA PROPRE configuration (interrupteurs généraux
+// et par élément, textes, mode du QR) et de SES PROPRES paramètres de
+// positionnement (positions, décalages ±1500 pt, tailles, rotations, échelle
+// du bloc certificat).
+//
+// MODIFIÉ (v0.2.99) — CERTIFICAT DE SIGNATURE ÉLECTRONIQUE TOTALEMENT
+// DÉDIÉ : le certificat des réponses possède DÉSORMAIS son PROPRE fichier
+// (importé dans le panneau des réponses, copie CHIFFRÉE distincte
+// storage/tampons/certificat-reponse-…), SON PROPRE mot de passe (chiffré
+// AES-256-GCM, jamais renvoyé à l'interface) et SES PROPRES métadonnées.
+// Une modification du certificat dans la section « Import » (réimport,
+// retrait, mot de passe, positionnement) n'affecte PLUS les réponses, et
+// inversement. Les SEULS actifs encore partagés sont les IMAGES (signature
+// /cachet et QR fourni) importées dans l'onglet Importation.
+// CONTINUITÉ (une seule fois) : si la ligne réponses existait déjà avec
+// l'interrupteur certificat ON sans certificat dédié (installation venue de
+// la v0.2.93 → v0.2.98, où le fichier était partagé), le PREMIER accès
+// après mise à jour copie les métadonnées du certificat « Import » dans la
+// ligne réponses (marqueur certHeriteImport) — l'état appliqué est
+// inchangé, puis les deux sections évoluent INDÉPENDAMMENT. Le singleton
+// « signature-reponse » n'est créé QU'AU PREMIER ENREGISTREMENT (PUT
+// scope=reponse) : tant qu'il n'existe pas, le mode Automatique des
+// réponses continue d'utiliser la configuration « Import » (continuité
+// historique exacte, aucun changement de comportement pour les
+// installations existantes).
+model SignatureConfigReponse {
+  id           String  @id @default("signature-reponse")
+  actif        Boolean @default(false) // interrupteur général du tampon des RÉPONSES
+  // ---- Signature électronique (même sémantique que SignatureConfig) ----
+  sigActif     Boolean @default(false)
+  sigTexte     String  @default("") // ligne(s) de texte sous l'image (propre aux réponses)
+  sigPosition  String  @default("BAS_DROITE")
+  sigTaille    Int     @default(120)
+  sigOpacite   Float   @default(0.9)
+  // ---- QR code (le mode FICHE, spécifique aux fiches de paie, n'est pas
+  //      proposé ici : DONNEES | URL | TEXTE | IMAGE) ----
+  qrActif      Boolean @default(false)
+  qrMode       String  @default("DONNEES")
+  qrUrl        String  @default("") // adresse de base : renseignée, le QR encode l'URL publique de vérification de la réponse
+  qrTexte      String  @default("")
+  qrPosition   String  @default("BAS_GAUCHE")
+  qrTaille     Int     @default(110)
+  // ---- Décalages fins (positionnement libre ±1500 pt) ----
+  sigDecalX    Int     @default(0)
+  sigDecalY    Int     @default(0)
+  qrDecalX     Int     @default(0)
+  qrDecalY     Int     @default(0)
+  // ---- Rotations (0 → 360° sens horaire) ----
+  sigRotation  Int     @default(0)
+  qrRotation   Int     @default(0)
+  // ---- Mention légale ----
+  mentionActif Boolean @default(true)
+  mentionTexte String  @default("Document signé électroniquement — Service RH — {DATE}")
+  // ---- Certificat de signature électronique — (v0.2.93) interrupteur +
+  //      positionnement PROPRES ; (v0.2.99) CERTIFICAT TOTALEMENT DÉDIÉ :
+  //      fichier, mot de passe (chiffré) et métadonnées propres aux
+  //      réponses — indépendants de la section Import dans les DEUX sens.
+  certActif     Boolean @default(false)
+  certPosition  String  @default("BAS_CENTRE")
+  certDecalX    Int     @default(0)
+  certDecalY    Int     @default(0)
+  certTaille    Int     @default(100)
+  // ---- (v0.2.99) FICHIER et MÉTADONNÉES du certificat DÉDIÉ ----
+  certFormat     String    @default("") // PKCS#12 | PKCS#7 | XML-DSig | X.509
+  certFichierNom String    @default("") // nom du fichier d'origine importé ICI
+  certChemin     String    @default("") // copie CHIFFRÉE propre (storage/tampons/certificat-reponse-…)
+  certSujet      String    @default("")
+  certEmetteur   String    @default("")
+  certSerie      String    @default("")
+  certValideDu   DateTime?
+  certValideAu   DateTime?
+  certEmpreinte  String    @default("")
+  certImportLe   DateTime?
+  certMotDePasse String    @default("") // CHIFFRÉ AES-256-GCM (middleware db) — jamais affiché
+  // ---- (NOUVEAU v0.2.112) CLÉ PRIVÉE ASSOCIÉE — fichier séparé (.pem/.key/.der)
+  // Mêmes règles que la section Import : certificat importé SEUL accepté quand
+  // la clé privée est déjà disponible (association vérifiée), coffre
+  // .p12/.pfx ou clé séparée ; fichier CHIFFRÉ, mot de passe CHIFFRÉ.
+  certCleChemin     String    @default("") // copie CHIFFRÉE (storage/tampons/cle-privee-reponse-…)
+  certCleFichierNom String    @default("") // nom du fichier de clé d'origine
+  certCleType       String    @default("") // type affiché (« RSA 2048 bits »)
+  certCleMotDePasse String    @default("") // CHIFFRÉ AES-256-GCM (middleware db)
+  certCleImportLe   DateTime? // date d'import du fichier de clé
+  // Marqueur de continuité (v0.2.99) : VRAI dès que les métadonnées du
+  // certificat « Import » ont été copiées ici (premier accès après mise à
+  // jour d'une installation où le fichier était partagé) — empêche toute
+  // nouvelle copie (le retrait du certificat dédié n'est jamais annulé).
+  certHeriteImport Boolean @default(false)
+  // ---- (NOUVEAU v0.2.119) ÉLÉMENT « SIGNATURE ÉLECTRONIQUE » DU TAMPON
+  // DES RÉPONSES — mêmes règles que la section Import : alimenté EN DIRECT
+  // par le certificat du module de signature (SignatureApiConfig), aucune
+  // donnée de certificat stockée ici, OFF = jamais apposé.
+  elecActif      Boolean @default(false)
+  elecPosition   String  @default("BAS_DROITE")
+  elecDecalX     Int     @default(0)
+  elecDecalY     Int     @default(0)
+  elecTaille     Int     @default(100) // échelle du bloc 50 → 300 %
+  // ---- (NOUVEAU v0.2.120) FORME du cachet « Signature électronique » ----
+  // RECTANGLE = bloc encadré historique (v0.2.119) ; ROND = cachet rond de
+  // type « cachet d'entreprise » (exemple utilisateur transfernow) : deux
+  // cercles concentriques, organisation en arc supérieur, mention
+  // « SIGNATURE ÉLECTRONIQUE » en arc inférieur, titulaire (CN) en gras au
+  // centre + validité + émetteur. Même contenu, même garantie : un cachet
+  // rond n'est apposé que si la signature PAdES couvre le document.
+  elecForme      String  @default("RECTANGLE") // RECTANGLE | ROND
+  // ---- (NOUVEAU v0.2.128) CONTENU du cachet — mêmes règles que la section
+  // Import (formulaire de choix, défaut = aucune information du certificat,
+  // ligne personnalisée déterministe) ; interrupteurs PROPRES aux réponses.
+  elecAffSignataire   Boolean @default(false)
+  elecAffOrganisation Boolean @default(false)
+  elecAffEmetteur     Boolean @default(false)
+  elecAffValidite     Boolean @default(false)
+  elecAffEmpreinte    Boolean @default(false)
+  elecTexteLibre      String  @default("")
+  updatedAt    DateTime @updatedAt
+}
+
+// ============================================================================
+// NOUVEAU (Task 184, v0.2.144) — CONFIGURATION « RÉPONSE AUTOMATIQUE PDF PAR
+// E-MAIL » DES DEMANDES (congé / autorisation) — TOTALEMENT INDÉPENDANTE
+// ============================================================================
+// Demande utilisateur : « Ajouter une configuration spécifique et indépendante
+// pour les réponses PDF des demandes, sans modifier ni dépendre directement de
+// la configuration utilisée pour l'import des fiches de paie » — signature
+// électronique (certificat DÉDIÉ à cette section), tampon, QR Code, image de
+// signature, position/taille/rotation/déplacement de CHAQUE élément, aperçu
+// interactif, et options d'envoi e-mail (employé + RH + manager).
+//
+// INDÉPENDANCE TOTALE (aucune lecture de SignatureConfig « Import » ni du
+// module SignatureApiConfig quand cette configuration est ACTIVE) :
+//  - le certificat est DÉDIÉ : fichier .p12/.pfx importé ICI (CHIFFRÉ sur
+//    disque storage/reponse-pdf/), mot de passe CHIFFRÉ en base (carte alea,
+//    jamais renvoyé à l'interface) ;
+//  - les images (paraphe, tampon, QR fourni) sont importées ICI — aucune
+//    source « Import » ;
+//  - le cachet « Signature électronique » est alimenté par le certificat
+//    DÉDIÉ de CETTE section (métadonnées stockées à l'import).
+// Continuité : actif = false (défaut) → le comportement v0.2.143 (config
+// historique du document, sources dédiées/module) s'applique sans changement.
+model ReponsePdfConfig {
+  id           String  @id @default("reponse-pdf")
+  actif        Boolean @default(false) // génération + envoi automatiques de la réponse PDF
+  // ---- (v0.2.145) INTERRUPTEURS INDÉPENDANTS PAR ÉLÉMENT — chacun ON/OFF
+  //      séparément : paraphe, tampon, cachet « Signature électronique »
+  //      (elecActif ci-dessous) et signature PAdES par le certificat dédié.
+  //      Défaut true = continuité v0.2.144 (élément appliqué quand configuré).
+  sigActif    Boolean @default(true) // paraphe (signature image) dessiné sur la réponse
+  tamponActif Boolean @default(true) // tampon (cachet de l'établissement) dessiné sur la réponse
+  signerActif Boolean @default(true) // signature électronique PAdES par LE certificat dédié de la section
+  // ---- Signature image (paraphe) — PROPRE à cette section ----
+  sigImage       String  @default("") // dataURL PNG/JPG (non chiffré : visible sur le document)
+  sigImageNom    String  @default("") // nom du fichier d'origine
+  sigImageChemin String  @default("") // copie de contrôle CHIFFRÉE (storage/reponse-pdf/)
+  sigPosition    String  @default("BAS_DROITE")
+  sigTaille      Int     @default(120) // largeur en points PDF (40 → 1200)
+  sigOpacite     Float   @default(0.9)
+  sigDecalX      Int     @default(0)   // ±1500 pt
+  sigDecalY      Int     @default(0)
+  sigRotation    Int     @default(0)   // 0 → 360° horaire
+  // ---- Tampon image (cachet) ----
+  tamponImage       String  @default("")
+  tamponImageNom    String  @default("")
+  tamponImageChemin String  @default("")
+  tamponPosition    String  @default("BAS_GAUCHE")
+  tamponTaille      Int     @default(140)
+  tamponOpacite     Float   @default(0.85)
+  tamponDecalX      Int     @default(0)
+  tamponDecalY      Int     @default(0)
+  tamponRotation    Int     @default(0)
+  // ---- QR code (5 modes du moteur unifié ; « FICHE » = page publique de
+  //      vérification de la réponse {qrUrl}/verification/reponse/{ref}?t=jeton)
+  qrActif    Boolean @default(false)
+  qrMode     String  @default("FICHE") // DONNEES | URL | FICHE | TEXTE | IMAGE
+  qrUrl      String  @default("")
+  qrTexte    String  @default("")
+  qrImage    String  @default("")
+  qrImageNom String  @default("")
+  qrPosition String  @default("BAS_GAUCHE")
+  qrTaille   Int     @default(110)
+  qrDecalX   Int     @default(0)
+  qrDecalY   Int     @default(0)
+  qrRotation Int     @default(0)
+  // ---- CERTIFICAT ÉLECTRONIQUE DÉDIÉ (signature PAdES des réponses) ----
+  // Même discipline que les autres sections : fichier CHIFFRÉ sur disque,
+  // mot de passe CHIFFRÉ en base, seules les MÉTADONNÉES publiques stockées.
+  certActif      Boolean   @default(false) // apposition du bloc certificat
+  certPosition   String    @default("BAS_CENTRE")
+  certDecalX     Int       @default(0)
+  certDecalY     Int       @default(0)
+  certTaille     Int       @default(100)
+  certFormat     String    @default("") // PKCS#12 (seul format signant ici)
+  certFichierNom String    @default("")
+  certChemin     String    @default("") // copie CHIFFRÉE storage/reponse-pdf/certificat-…
+  certSujet      String    @default("")
+  certEmetteur   String    @default("")
+  certSerie      String    @default("")
+  certValideDu   DateTime?
+  certValideAu   DateTime?
+  certEmpreinte  String    @default("")
+  certImportLe   DateTime?
+  certMotDePasse String    @default("") // CHIFFRÉ AES-256-GCM (middleware db)
+  certSignataire String    @default("") // nom affiché dans le bloc « Fait le… »
+  certFonction   String    @default("") // fonction affichée sous le signataire
+  // ---- Cachet « Signature électronique » — alimenté par LE certificat
+  //      DÉDIÉ de CETTE section (aucune dépendance au module de signature)
+  elecActif           Boolean @default(false)
+  elecPosition        String  @default("BAS_DROITE")
+  elecDecalX          Int     @default(0)
+  elecDecalY          Int     @default(0)
+  elecTaille          Int     @default(100) // échelle du bloc 50 → 300 %
+  elecForme           String  @default("RECTANGLE") // RECTANGLE | ROND
+  elecAffSignataire   Boolean @default(false)
+  elecAffOrganisation Boolean @default(false)
+  elecAffEmetteur     Boolean @default(false)
+  elecAffValidite     Boolean @default(false)
+  elecAffEmpreinte    Boolean @default(false)
+  elecTexteLibre      String  @default("")
+  // ---- Mention légale ----
+  mentionActif Boolean @default(true)
+  mentionTexte String  @default("Document signé électroniquement — Service RH — {DATE}")
+  // ---- ENVOI E-MAIL AUTOMATIQUE (employé À + RH et manager en copie,
+  //      PDF signé en pièce jointe — destinataires activables séparément)
+  emailActif     Boolean @default(true)
+  emailObjet     String  @default("Votre {TYPE} — {REF} : {STATUT} — réponse PDF jointe")
+  emailCorps     String  @default("") // corps personnalisé (vide = corps par défaut)
+  envoyerEmploye Boolean @default(true)
+  envoyerRh      Boolean @default(true)
+  envoyerManager Boolean @default(true)
+  updatedAt      DateTime @updatedAt
+}
+
+// ============================================================================
+// NOUVEAU (Task 224) — API DE CERTIFICATION ET DE SIGNATURE ÉLECTRONIQUE
+// ============================================================================
+// Connexion à une API de certification/signature électronique (service externe)
+// OU signature PAdES réalisée LOCALEMENT par le serveur avec le certificat
+// importé (coffre .p12/.pfx ou clé privée séparée). Configuration singleton
+// (id = "signature-api"), rubrique « API de certification & signature » de
+// l'onglet Paramètres (rôles IT / SUPERADMIN).
+//
+// SÉCURITÉ (même discipline que MailConfig / SignatureConfig) :
+//  - apiSecret, certMotDePasse et certCleMotDePasse sont CHIFFRÉS AES-256-GCM
+//    par le middleware db (carte chiffrement db-crypto.ts) et ne sont JAMAIS
+//    renvoyés à l'interface (booléens *Enregistre seuls) ;
+//  - le fichier du certificat (et la clé privée éventuelle) est conservé
+//    CHIFFRÉ sur le disque (storage/signatures/, AES-256-GCM, 0600) ;
+//  - l'environnement TEST/PRODUCTION permet de cibler le bac à sable du
+//    fournisseur sans jamais mixer les identifiants.
+model SignatureApiConfig {
+  id            String   @id @default("signature-api")
+  actif         Boolean  @default(false) // interrupteur général du module
+  mode          String   @default("LOCALE") // LOCALE (PAdES serveur) | API_EXTERNE
+  environnement String   @default("TEST") // TEST | PRODUCTION
+  // ---- Périmètre d'application (NOUVEAU Task 224) ----
+  signerFiches   Boolean @default(true)  // fiches de paie (servage + portail)
+  signerReponses Boolean @default(true)  // documents des demandes/réponses
+  // ---- Raisons légales PAdES (affichées dans le dictionnaire de signature) ----
+  raison        String   @default("Approbation du document")
+  emplacement   String   @default("")
+  contact       String   @default("")
+  // ---- Certificat LOCAL (mode LOCALE) — mêmes règles que SignatureConfig ----
+  certFormat      String    @default("") // PKCS#12 | PKCS#7 | X.509 | PEM
+  certFichierNom  String    @default("") // nom du fichier d'origine (ex. sig.p12)
+  certChemin      String    @default("") // copie CHIFFRÉE (storage/signatures/certificat-…)
+  certSujet       String    @default("") // titulaire (CN, O, OU…)
+  certEmetteur    String    @default("") // autorité de certification
+  certSerie       String    @default("") // numéro de série (hex)
+  certValideDu    DateTime?
+  certValideAu    DateTime?
+  certEmpreinte   String    @default("") // SHA-256 (hex)
+  certImportLe    DateTime?
+  certMotDePasse  String    @default("") // CHIFFRÉ AES-256-GCM — jamais renvoyé
+  // Clé privée SÉPARÉE (si le certificat est importé seul : .pem/.key/.der)
+  certCleChemin     String    @default("") // copie CHIFFRÉE (storage/signatures/cle-privee-…)
+  certCleFichierNom String    @default("") // nom du fichier de clé d'origine
+  certCleType       String    @default("") // affiché (« RSA 2048 bits »)
+  certCleMotDePasse String    @default("") // CHIFFRÉ AES-256-GCM
+  certCleImportLe   DateTime?
+  // ---- API EXTERNE (mode API_EXTERNE) ----
+  apiUrlTest    String   @default("") // URL environnement TEST (bac à sable)
+  apiUrlProd    String   @default("") // URL environnement PRODUCTION
+  apiAuthType   String   @default("BEARER") // BEARER | API_KEY | BASIC | AUCUN
+  apiAuthEntete String   @default("Authorization") // nom d'en-tête (mode API_KEY)
+  apiIdentifiant String  @default("") // identifiant client / clé publique (EN CLAIR)
+  apiSecret     String   @default("") // secret / token / mot de passe — CHIFFRÉ
+  apiEntetesSup String   @default("") // en-têtes additionnels JSON {"X-…":"…"}
+  apiChampReponse String @default("") // chemin JSON du PDF signé (ex. data.file) — vide = réponse binaire
+  apiTimeoutMs  Int      @default(30000)
+  apiDernierTestLe      DateTime?
+  apiDernierTestOk      Boolean @default(false)
+  apiDernierTestMessage String  @default("")
+  // ---- Vérification automatique des documents signés ----
+  verifierAuto  Boolean @default(true)
+  updatedAt     DateTime @updatedAt
+}
+
+// NOUVEAU (Task 224) — REGISTRE DE CONSERVATION des documents signés : chaque
+// signature produit une COPIE CONSERVÉE du PDF signé (chiffrée AES-256-GCM,
+// storage/signatures/documents/) + les métadonnées du certificat ASSOCIÉ
+// (extraites du CMS embarqué, jamais saisies à la main) + le résultat de la
+// VÉRIFICATION d'intégrité (reconstituée depuis les ByteRange du document).
+// type : FICHE_PAIE | REPONSE — sourceId : id de la fiche / de la demande.
+model SignatureApiDocument {
+  id          String   @id @default(cuid())
+  type        String   // FICHE_PAIE | REPONSE
+  sourceId    String   // id Payslip / id DemandeAdministrative
+  reference   String   @default("") // référence lisible (matricule-période / réf. demande)
+  nomFichier  String   @default("")
+  mode        String   @default("LOCALE") // LOCALE | API_EXTERNE
+  environnement String @default("TEST")
+  chemin      String   @default("") // copie CHIFFRÉE conservée (storage/signatures/documents/…)
+  tailleOctets Int     @default(0)
+  // ---- Certificat associé (extrait du document signé) ----
+  certSujet    String  @default("")
+  certEmetteur String  @default("")
+  certSerie    String  @default("")
+  certEmpreinte String @default("") // SHA-256 du certificat signataire
+  certValideDu DateTime?
+  certValideAu DateTime?
+  // ---- Vérification (integrité + certificat) ----
+  verifStatut  String  @default("NON_VERIFIE") // VALIDE | INVALIDE | NON_VERIFIE
+  verifLe      DateTime?
+  verifMessage String  @default("")
+  // ---- Traçabilité ----
+  signeLe     DateTime @default(now())
+  signePar    String   @default("") // compte admin à l'origine (servage = "système")
+  empreinteOrigine String @default("") // SHA-256 du PDF AVANT signature (cache : évite les re-signatures)
+
+  @@index([type, sourceId])
+  @@index([empreinteOrigine])
+  @@index([signeLe])
+}

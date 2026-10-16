@@ -1,0 +1,17 @@
+=== BUILD v0.2.115 — démarré 13:05:27 ===
+tsc_exit=1
+--- erreurs fichiers Task 225 (signature) ---
+AUCUNE
+--- erreurs src/app/page.tsx ---
+AUCUNE
+build_exit=0
+BUILD_OK
+✓ Compiled successfully in 59s
+  Generating static pages using 1 worker (0/33) ...
+  Generating static pages using 1 worker (8/33) 
+  Generating static pages using 1 worker (16/33) 
+  Generating static pages using 1 worker (24/33) 
+✓ Generating static pages using 1 worker (33/33) in 171.4ms
+Route (app)
+├ ƒ /api/signature-api/signer
+=== FIN 13:06:47 ===

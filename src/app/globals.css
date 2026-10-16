@@ -1,0 +1,251 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* ------------------------------------------------------------------ */
+  /*  v0.2.199 — THÈME BLANC + VERT ÉMERAUDE (demande utilisateur)       */
+  /*  Le fond de page est désormais un BLANC CASSÉ très légèrement teinté*/
+  /*  de vert (#f6fef9) pour un rendu reposant et cohérent avec le thème.*/
+  /*  L'accent principal est le vert émeraude #10b981 (emerald-500).     */
+  /* ------------------------------------------------------------------ */
+  --background: oklch(0.99 0.005 162);          /* #f6fef9 — blanc cassé vert */
+  --foreground: oklch(0.18 0.02 162);           /* texte vert très foncé ~ #0f1f1a */
+  --card: oklch(1 0 0);                         /* cartes blanc pur #ffffff */
+  --card-foreground: oklch(0.18 0.02 162);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.02 162);
+  /* Primaire : vert émeraude #10b981 (emerald-500) — boutons, tabs actifs */
+  --primary: oklch(0.69 0.17 162);              /* #10b981 */
+  --primary-foreground: oklch(0.99 0 0);        /* blanc */
+  --secondary: oklch(0.96 0.02 162);            /* vert très clair #ecfdf5 */
+  --secondary-foreground: oklch(0.30 0.10 162); /* vert foncé */
+  --muted: oklch(0.96 0.01 162);                /* gris-vert clair */
+  --muted-foreground: oklch(0.55 0.02 162);     /* gris-vert moyen */
+  --accent: oklch(0.95 0.03 162);               /* vert clair accent */
+  --accent-foreground: oklch(0.30 0.10 162);
+  --destructive: oklch(0.577 0.245 27.325);     /* rouge inchangé */
+  --border: oklch(0.92 0.01 162);               /* bordure vert-gris très clair */
+  --input: oklch(0.92 0.01 162);
+  --ring: oklch(0.69 0.17 162);                 /* focus ring vert émeraude */
+  --chart-1: oklch(0.69 0.17 162);              /* vert principal */
+  --chart-2: oklch(0.60 0.13 200);              /* cyan-vert */
+  --chart-3: oklch(0.55 0.15 145);              /* vert lime */
+  --chart-4: oklch(0.78 0.18 85);               /* ambre (complément) */
+  --chart-5: oklch(0.65 0.20 25);               /* orange (complément) */
+  --sidebar: oklch(0.99 0.005 162);             /* sidebar blanc cassé */
+  --sidebar-foreground: oklch(0.18 0.02 162);
+  --sidebar-primary: oklch(0.69 0.17 162);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.95 0.03 162);
+  --sidebar-accent-foreground: oklch(0.30 0.10 162);
+  --sidebar-border: oklch(0.92 0.01 162);
+  --sidebar-ring: oklch(0.69 0.17 162);
+}
+
+/* ------------------------------------------------------------------ */
+/*  MODE SOMBRE — adapté au vert émeraude (v0.2.199)                  */
+/*  Fond gris très foncé + accents verts émeraude pour cohérence avec */
+/*  le thème clair. Le vert remplace l'orange/rose/violet précédent.  */
+/* ------------------------------------------------------------------ */
+.dark {
+  --background: oklch(0.16 0.01 162);           /* gris-vert foncé */
+  --foreground: oklch(0.97 0.01 162);
+  --card: oklch(0.21 0.01 162);
+  --card-foreground: oklch(0.97 0.01 162);
+  --popover: oklch(0.21 0.01 162);
+  --popover-foreground: oklch(0.97 0.01 162);
+  --primary: oklch(0.69 0.17 162);               /* vert émeraude */
+  --primary-foreground: oklch(0.16 0.01 162);
+  --secondary: oklch(0.27 0.02 162);
+  --secondary-foreground: oklch(0.97 0.01 162);
+  --muted: oklch(0.27 0.02 162);
+  --muted-foreground: oklch(0.71 0.02 162);
+  --accent: oklch(0.27 0.05 162);                /* accent vert foncé */
+  --accent-foreground: oklch(0.97 0.01 162);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.69 0.17 162);                  /* focus vert */
+  --chart-1: oklch(0.69 0.17 162);
+  --chart-2: oklch(0.60 0.13 200);
+  --chart-3: oklch(0.55 0.15 145);
+  --chart-4: oklch(0.78 0.18 85);
+  --chart-5: oklch(0.65 0.20 25);
+  --sidebar: oklch(0.21 0.01 162);
+  --sidebar-foreground: oklch(0.97 0.01 162);
+  --sidebar-primary: oklch(0.69 0.17 162);
+  --sidebar-primary-foreground: oklch(0.97 0.01 162);
+  --sidebar-accent: oklch(0.27 0.05 162);
+  --sidebar-accent-foreground: oklch(0.97 0.01 162);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.69 0.17 162);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════ */
+/*  v0.2.199 — PALETTE ÉMERAUDE (remplace la palette orange Trailmix)  */
+/*  Toutes les classes Tailwind `emerald-*` (212 occurrences dans le    */
+/*  code UI : boutons, badges, textes d'icônes, bordures, tabs actifs,  */
+/*  cartes mises en avant) utilisent désormais la VRAIE palette verte   */
+/*  émeraude au lieu du dégradé orange→rose→violet hérité du logo.      */
+/*                                                                      */
+/*  Palette complète (identique à Tailwind v3 par défaut, vert émeraude) */
+/*    50  #ecfdf5    100 #d1fae5    200 #a7f3d0    300 #6ee7b7         */
+/*    400 #34d399    500 #10b981    600 #059669     700 #047857         */
+/*    800 #065f46    900 #064e3b                                     */
+/*                                                                      */
+/*  Le fond de page est blanc cassé avec une teinte verte subtile.      */
+/* ════════════════════════════════════════════════════════════════════ */
+@theme {
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+  --color-emerald-900: #064e3b;
+  /* Blanc cassé légèrement vert pour le fond de page (bg-neutral-50) */
+  --color-neutral-50: #f6fef9;
+}
+
+/* ════════════════════════════════════════════════════════════════════ */
+/*  FOND DE PAGE — blanc cassé vert (v0.2.199)                         */
+/*  Plus de dégradé multi-couleurs : un fond uni clair, reposant,      */
+/*  cohérent avec le thème vert émeraude. Fixé au viewport.            */
+/* ════════════════════════════════════════════════════════════════════ */
+body {
+  background: #f6fef9 fixed;
+}
+
+/* .bg-neutral-50 est utilisé comme fond de page principal (page.tsx) —
+ * on le force au même blanc cassé vert pour cohérence avec body. */
+.bg-neutral-50 {
+  background-color: #f6fef9;
+}
+
+/* ════════════════════════════════════════════════════════════════════ */
+/*  BOUTONS PRINCIPAUX — vert émeraude UNI (v0.2.199)                  */
+/*  Remplace le dégradé orange→rose→violet par un vert émeraude uni.  */
+/*  Hover : vert légèrement plus foncé (emerald-700).                 */
+/*  Texte blanc, bordure transparente.                                */
+/* ════════════════════════════════════════════════════════════════════ */
+.bg-emerald-600 {
+  background-color: #059669;
+  background-image: none;
+  border-color: transparent;
+}
+
+.bg-emerald-700,
+.hover\:bg-emerald-700:hover {
+  background-color: #047857;
+  background-image: none;
+  border-color: transparent;
+}
+
+/* En mode sombre, les boutons emerald-600 restent verts mais un peu
+ * plus vifs pour bien ressortir sur le fond foncé. */
+.dark .bg-emerald-600 {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.dark .bg-emerald-700,
+.dark .hover\:bg-emerald-700:hover {
+  background-color: #059669;
+}
+
+/* ════════════════════════════════════════════════════════════════════ */
+/*  AMÉLIORATIONS VISUELLES — v0.2.199                                 */
+/*  Petites améliorations pour un rendu plus « carte blanche + vert » : */
+/*    - Ombres portées plus douces (vert-gris) sur les cartes          */
+/*    - Bordures d'input vert très clair au focus                       */
+/* ════════════════════════════════════════════════════════════════════ */
+
+/* Les inputs/textarea/select ont une bordure verte subtile au focus */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus-visible {
+  outline-color: #10b981;
+}
+
+/* Scrollbar verte subtile (Webkit) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f6fef9;
+}
+::-webkit-scrollbar-thumb {
+  background: #a7f3d0;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6ee7b7;
+}
+
+/* En mode sombre : scrollbar adaptée */
+.dark ::-webkit-scrollbar-track {
+  background: #0f1f1a;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #047857;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #065f46;
+}

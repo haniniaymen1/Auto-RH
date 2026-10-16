@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    @page { size: 794px 1123px; margin: 0; }
+    :root {
+      --c-bg: #f4f5f5;
+      --c-accent: #266a8b;
+      --c-text: #171819;
+      --c-muted: #72787b;
+      --c-mid: #48616e;
+      --c-surface: #e5e9eb;
+    }
+    html, body { margin: 0; padding: 0; width: 794px; height: 1123px;
+      background: var(--c-bg); font-family: 'Inter', sans-serif; }
+    @media screen {
+      html { height: auto; display: flex; justify-content: center; min-height: 100vh; background: var(--c-bg); }
+      body { transform-origin: top center; scale: min(1, calc(100vw / 794), calc(100vh / 1123)); margin: 0 auto; box-shadow: 0 0 60px rgba(0,0,0,0.18); }
+    }
+    .cover { width: 794px; height: 1123px; position: relative; box-sizing: border-box; }
+    /* Layer 1 : grille discrète (primaire à 2 %) */
+    .grid { position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(38,106,139,0.05) 0 0.5px, transparent 0.5px 50px),
+        repeating-linear-gradient(90deg, rgba(38,106,139,0.05) 0 0.5px, transparent 0.5px 50px);
+    }
+    /* Layer 2 : ligne d'ancrage verticale épaisse (6pt = 8px) */
+    .vline { position: absolute; left: 95px; top: 112px; bottom: 112px; width: 8px;
+      background: var(--c-accent); }
+    /* Layer 3 : contenu — X = 0.12W + 40px = 135px */
+    .kicker { position: absolute; left: 145px; top: 168px; max-width: 560px;
+      font-size: 15pt; font-weight: 400; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--c-accent); opacity: 0.62; }
+    .title { position: absolute; left: 145px; top: 300px; max-width: 580px;
+      font-size: 64pt; font-weight: 900; line-height: 1.15; color: var(--c-text); }
+    .summary { position: absolute; left: 145px; top: 561px; max-width: 476px;
+      font-size: 16.5pt; font-weight: 400; line-height: 1.6; color: var(--c-text); opacity: 0.85; }
+    .meta { position: absolute; left: 145px; top: 842px; max-width: 540px;
+      font-size: 16pt; font-weight: 400; line-height: 1.55; color: var(--c-muted); }
+    .meta b { color: var(--c-mid); font-weight: 700; }
+    .footer { position: absolute; left: 145px; bottom: 92px; font-size: 13pt;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--c-muted); opacity: 0.6; }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="grid"></div>
+    <div class="vline"></div>
+    <div class="kicker">Rapport d'audit de sécurité</div>
+    <div class="title">Auto-RH</div>
+    <div class="summary">
+      Vérification complète de l'archive publique 0.2.24 : authentification,
+      sessions, chiffrement de la base, portail employés, anti-force-brute et
+      dépendances. 37 contrôles dynamiques exécutés ; une faille de configuration
+      démontrée par exploitation de preuve, avec plan de correction priorisé.
+    </div>
+    <div class="meta">
+      <b>Version auditée</b> &nbsp;0.2.24 — 307 fichiers<br>
+      <b>Empreinte MD5</b> &nbsp;084443a4609aa64e7ffb997847ac1862<br>
+      <b>Date de l'audit</b> &nbsp;20 septembre 2026
+    </div>
+    <div class="footer">Confidentiel — usage interne</div>
+  </div>
+</body>
+</html>

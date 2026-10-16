@@ -1,0 +1,31 @@
+TUNIS CALL CENTER
+Matricule CNSS : 209 959 - 51
+1 BULLETINDEPAAE TT               | SALAIRE          LS
+                                                                                                                     01/08/26                  31/08/26
+"MATRICULE 1 1 NOMETPRENOM TT             FONCTION              | CATEGORIE |
+[0087 | EMPLOYETEST :ç— — | Tremnidenen informatique           0
+|    Célibataire           0                    17775208 - 08                12345678                |                                     12000 1612,190
+WE Rubrique           1107 | 1)           Gains —       |       Retenues
+€ Présence T0           PL)             1       | 12,000          PS        |
+10 Salaire de base du mois                             | 12000 | 1612,190            |          879,376           |                            |
+60 Congés payés                                         |        7,000 |        73,281 |           i         512,967          |                           |
+110 Indemnité de présence                    | 19,000 |      2,080 |        |         1,796       |                  |
+120 Indemnité de transport                            | 19,000 |       36,112 |           |           31,188          |                           |
+40 Jours Fériés / Supplémentair              |     1,000 |     75,017 |        |        75,017       |                   |
+190 Quote part prime                                      |                 |                 |            |          590,193           |                            |
+Total Brut                                                                           2090,537
+6     CNSS                                                                        2090,537     9,680                                        202,364
+710 Assurance maladie                                  |                    1425,327 | 1,050 |                              |          14,966        |
+720" Assurance Invalidité Décès                       |                    1425,327 | 0,143 |                              |            2,038        |
+800 SALAIRE IMPOSABLE                            |                                |           |        1888,173           |                           |
+909 IRPP                                                     |                                |           |                              |         269021
+950 Retenue CSS                                          |                                |           |                              |            8,297        |
+|            Total Cotisations                       |                                           496,686
+1990 Salaire Net                                        |                        1593,851
+2100 Net à payer                                            |                |                |           |        1593,851           |                           |
+T0 VIRER A                PS                     0 NUMERO DE COMPTE                          S                 NETAPAYER
+BIAT                                           00008 20000 05040144848 37                               1593,851
+CE                                                                          |    Cachet Société
+TELEMARKETING
+Au Capital de 1.050.000 DT -                RC. : 112312 1998                  M.F: 633781K/A/M/000
+Pour vous aider à faire valoir vos droits, conservez ce bulletin de paie sans          limitation de durée.

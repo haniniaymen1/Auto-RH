@@ -1,0 +1,43 @@
+# ============================================================
+#  Fiches de Paie - Docker Compose
+#
+#  Demarrage :  docker compose up -d
+#  Arret     :  docker compose down
+#  Logs      :  docker compose logs -f
+#
+#  Administration RH/IT :  http://localhost:4000  (connexion par login)
+#  Portail Employes     :  http://localhost:4001  (sans connexion)
+#
+#  Les donnees (base SQLite + PDF importes) persistent dans
+#  les dossiers ./db et ./storage du projet.
+# ============================================================
+
+services:
+  auto-rh:
+    build: .
+    container_name: auto-rh
+    environment:
+      AUTO_RH_STORAGE_DIR: /app/storage/payslips
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./db:/app/db            # base de donnees SQLite
+      - ./storage:/app/storage  # fiches de paie PDF importees
+    restart: unless-stopped
+
+  # Portail employes : page unique de recherche par CIN, sans login.
+  # Lit la meme base et les memes PDF que l'administration.
+  portail:
+    build: .
+    container_name: auto-rh-portail
+    command: ["node", "scripts/portail-server.js"]
+    environment:
+      PORTAL_PORT: "4001"
+      DATABASE_URL: file:/app/db/custom.db
+      AUTO_RH_STORAGE_DIR: /app/storage/payslips
+    ports:
+      - "4001:4001"
+    volumes:
+      - ./db:/app/db            # meme base que l'administration
+      - ./storage:/app/storage  # memes PDF que l'administration
+    restart: unless-stopped

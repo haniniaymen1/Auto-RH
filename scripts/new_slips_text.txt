@@ -1,0 +1,767 @@
+======================================================================
+FICHIER: fiche_paie_01_specimen.pdf — longueur texte: 862
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+Document fictif de demonstration
+BULLETIN 01/20
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Amine Ben Salem
+Technicien support
+Matricule: EMP-DEMO-001
+PERIODE DE PAIE
+Janvier 2026
+DATE DE PAIEMENT
+31/01/2026
+CIN (FORMAT FICTIF)
+DEMO 001 234
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 450,000 TND 100 % 1 450,000 TND
+Heures supplementaires 0 h 125 % 0,000 TND
+Prime transport Forfait - 60,000 TND
+Cotisation sociale Assiette 9,20 % 133,400 TND
+Retenue fiscale (demo) Assiette 6,00 % 33,000 TND
+RECAPITULATIF
+Brut 1 510,000 TND
+Total retenues 166,400 TND
+NET A PAYER
+1 343,600 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 1/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_02_specimen.pdf — longueur texte: 877
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+BULLETIN DE SALAIRE
+SPECIMEN PEDAGOGIQUE - SANS VALEUR
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Sarra Trabelsi
+Assistante administrative
+Matricule: EMP-DEMO-002
+PERIODE DE PAIE
+Du 01/02/2026 au 28/02/2026
+DATE DE PAIEMENT
+28-02-2026
+CIN (FORMAT FICTIF)
+DEMO-12-3456
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 487,000 TND 100 % 1 487,000 TND
+Heures supplementaires 4 h 125 % 42,500 TND
+Prime transport Forfait - 70,000 TND
+Cotisation sociale Assiette 9,20 % 136,804 TND
+Retenue fiscale (demo) Assiette 6,00 % 35,220 TND
+RECAPITULATIF
+Brut 1 599,500 TND
+Total retenues 172,024 TND
+NET A PAYER
+1 427,476 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 2/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_03_specimen.pdf — longueur texte: 857
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+EXEMPLE FICTIF - NE PAS UTILISER COMME JUSTIFICATIF
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Youssef Gharbi
+Comptable junior
+Matricule: EMP-DEMO-003
+PERIODE DE PAIE
+03-2026
+DATE DE PAIEMENT
+31.03.2026
+CIN (FORMAT FICTIF)
+XX 003 456
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 524,000 TND 100 % 1 524,000 TND
+Heures supplementaires 8 h 125 % 85,000 TND
+Prime transport Forfait - 80,000 TND
+Cotisation sociale Assiette 9,20 % 140,208 TND
+Retenue fiscale (demo) Assiette 6,00 % 37,440 TND
+RECAPITULATIF
+Brut 1 689,000 TND
+Total retenues 177,648 TND
+NET A PAYER
+1 511,352 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 3/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_04_specimen.pdf — longueur texte: 876
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+Document fictif de demonstration
+BULLETIN 04/20
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Meriem Jlassi
+Agent logistique
+Matricule: EMP-DEMO-004
+PERIODE DE PAIE
+01.04.2026 - 30.04.2026
+DATE DE PAIEMENT
+30 avril 2026
+CIN (FORMAT FICTIF)
+FICTIF/004567
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 561,000 TND 100 % 1 561,000 TND
+Heures supplementaires 12 h 125 % 127,500 TND
+Prime transport Forfait - 60,000 TND
+Cotisation sociale Assiette 9,20 % 143,612 TND
+Retenue fiscale (demo) Assiette 6,00 % 39,660 TND
+RECAPITULATIF
+Brut 1 748,500 TND
+Total retenues 183,272 TND
+NET A PAYER
+1 565,228 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 4/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_05_specimen.pdf — longueur texte: 854
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+BULLETIN DE SALAIRE
+SPECIMEN PEDAGOGIQUE - SANS VALEUR
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Walid Hamdi
+Developpeur web
+Matricule: EMP-DEMO-005
+PERIODE DE PAIE
+Mai / 2026
+DATE DE PAIEMENT
+30/05/26
+CIN (FORMAT FICTIF)
+000 005 678 (INVALIDE)
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 598,000 TND 100 % 1 598,000 TND
+Heures supplementaires 0 h 125 % 0,000 TND
+Prime transport Forfait - 70,000 TND
+Cotisation sociale Assiette 9,20 % 147,016 TND
+Retenue fiscale (demo) Assiette 6,00 % 41,880 TND
+RECAPITULATIF
+Brut 1 668,000 TND
+Total retenues 188,896 TND
+NET A PAYER
+1 479,104 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 5/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_06_specimen.pdf — longueur texte: 859
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+EXEMPLE FICTIF - NE PAS UTILISER COMME JUSTIFICATIF
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Ines Ayari
+Chargee clientele
+Matricule: EMP-DEMO-006
+PERIODE DE PAIE
+2026-06
+DATE DE PAIEMENT
+2026-06-30
+CIN (FORMAT FICTIF)
+CIN-DEMO-006789
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 635,000 TND 100 % 1 635,000 TND
+Heures supplementaires 4 h 125 % 42,500 TND
+Prime transport Forfait - 80,000 TND
+Cotisation sociale Assiette 9,20 % 150,420 TND
+Retenue fiscale (demo) Assiette 6,00 % 44,100 TND
+RECAPITULATIF
+Brut 1 757,500 TND
+Total retenues 194,520 TND
+NET A PAYER
+1 562,980 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 6/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_07_specimen.pdf — longueur texte: 874
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+Document fictif de demonstration
+BULLETIN 07/20
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Fares Mabrouk
+Commercial terrain
+Matricule: EMP-DEMO-007
+PERIODE DE PAIE
+Du 1er au 31 juillet 2026
+DATE DE PAIEMENT
+31 JUIL. 2026
+CIN (FORMAT FICTIF)
+D-00-7890
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 672,000 TND 100 % 1 672,000 TND
+Heures supplementaires 8 h 125 % 85,000 TND
+Prime transport Forfait - 60,000 TND
+Cotisation sociale Assiette 9,20 % 153,824 TND
+Retenue fiscale (demo) Assiette 6,00 % 46,320 TND
+RECAPITULATIF
+Brut 1 817,000 TND
+Total retenues 200,144 TND
+NET A PAYER
+1 616,856 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 7/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_08_specimen.pdf — longueur texte: 869
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+BULLETIN DE SALAIRE
+SPECIMEN PEDAGOGIQUE - SANS VALEUR
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Rania Khelifi
+Responsable stock
+Matricule: EMP-DEMO-008
+PERIODE DE PAIE
+Aout 2026 (31 jours)
+DATE DE PAIEMENT
+31/08/2026 a 17h
+CIN (FORMAT FICTIF)
+SPEC 008 901
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 709,000 TND 100 % 1 709,000 TND
+Heures supplementaires 12 h 125 % 127,500 TND
+Prime transport Forfait - 70,000 TND
+Cotisation sociale Assiette 9,20 % 157,228 TND
+Retenue fiscale (demo) Assiette 6,00 % 48,540 TND
+RECAPITULATIF
+Brut 1 906,500 TND
+Total retenues 205,768 TND
+NET A PAYER
+1 700,732 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 8/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_09_specimen.pdf — longueur texte: 857
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+EXEMPLE FICTIF - NE PAS UTILISER COMME JUSTIFICATIF
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Nader Chatti
+Operateur qualite
+Matricule: EMP-DEMO-009
+PERIODE DE PAIE
+09/2026
+DATE DE PAIEMENT
+30-09-26
+CIN (FORMAT FICTIF)
+ID: DEMO009012
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 746,000 TND 100 % 1 746,000 TND
+Heures supplementaires 0 h 125 % 0,000 TND
+Prime transport Forfait - 80,000 TND
+Cotisation sociale Assiette 9,20 % 160,632 TND
+Retenue fiscale (demo) Assiette 6,00 % 50,760 TND
+RECAPITULATIF
+Brut 1 826,000 TND
+Total retenues 211,392 TND
+NET A PAYER
+1 614,608 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 9/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_10_specimen.pdf — longueur texte: 871
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+Document fictif de demonstration
+BULLETIN 10/20
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Aya Bouazizi
+Graphiste
+Matricule: EMP-DEMO-010
+PERIODE DE PAIE
+Periode: 01-10-26 au 31-10-26
+DATE DE PAIEMENT
+31.10.2026
+CIN (FORMAT FICTIF)
+FICTIF-010-123
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 783,000 TND 100 % 1 783,000 TND
+Heures supplementaires 4 h 125 % 42,500 TND
+Prime transport Forfait - 60,000 TND
+Cotisation sociale Assiette 9,20 % 164,036 TND
+Retenue fiscale (demo) Assiette 6,00 % 52,980 TND
+RECAPITULATIF
+Brut 1 885,500 TND
+Total retenues 217,016 TND
+NET A PAYER
+1 668,484 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 10/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_11_specimen.pdf — longueur texte: 872
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+BULLETIN DE SALAIRE
+SPECIMEN PEDAGOGIQUE - SANS VALEUR
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Mehdi Dridi
+Analyste donnees
+Matricule: EMP-DEMO-011
+PERIODE DE PAIE
+Novembre deux mille vingt-six
+DATE DE PAIEMENT
+30 novembre 2026
+CIN (FORMAT FICTIF)
+XX/011/234
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 820,000 TND 100 % 1 820,000 TND
+Heures supplementaires 8 h 125 % 85,000 TND
+Prime transport Forfait - 70,000 TND
+Cotisation sociale Assiette 9,20 % 167,440 TND
+Retenue fiscale (demo) Assiette 6,00 % 55,200 TND
+RECAPITULATIF
+Brut 1 975,000 TND
+Total retenues 222,640 TND
+NET A PAYER
+1 752,360 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 11/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_12_specimen.pdf — longueur texte: 860
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+EXEMPLE FICTIF - NE PAS UTILISER COMME JUSTIFICATIF
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Lina Saidi
+Coordinatrice RH
+Matricule: EMP-DEMO-012
+PERIODE DE PAIE
+2026 / DEC
+DATE DE PAIEMENT
+2026/12/31
+CIN (FORMAT FICTIF)
+DEMO 012345
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 857,000 TND 100 % 1 857,000 TND
+Heures supplementaires 12 h 125 % 127,500 TND
+Prime transport Forfait - 80,000 TND
+Cotisation sociale Assiette 9,20 % 170,844 TND
+Retenue fiscale (demo) Assiette 6,00 % 57,420 TND
+RECAPITULATIF
+Brut 2 064,500 TND
+Total retenues 228,264 TND
+NET A PAYER
+1 836,236 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 12/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_13_specimen.pdf — longueur texte: 870
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+Document fictif de demonstration
+BULLETIN 13/20
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Karim Ben Amor
+Chef equipe
+Matricule: EMP-DEMO-013
+PERIODE DE PAIE
+Semaine 02 a 05 - Jan. 2027
+DATE DE PAIEMENT
+29-01-2027
+CIN (FORMAT FICTIF)
+013-456-DEMO
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 894,000 TND 100 % 1 894,000 TND
+Heures supplementaires 0 h 125 % 0,000 TND
+Prime transport Forfait - 60,000 TND
+Cotisation sociale Assiette 9,20 % 174,248 TND
+Retenue fiscale (demo) Assiette 6,00 % 59,640 TND
+RECAPITULATIF
+Brut 1 954,000 TND
+Total retenues 233,888 TND
+NET A PAYER
+1 720,112 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 13/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_14_specimen.pdf — longueur texte: 861
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+BULLETIN DE SALAIRE
+SPECIMEN PEDAGOGIQUE - SANS VALEUR
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Nour Chaabane
+Acheteuse
+Matricule: EMP-DEMO-014
+PERIODE DE PAIE
+01/02/2027 -> 28/02/2027
+DATE DE PAIEMENT
+28 FEV 2027
+CIN (FORMAT FICTIF)
+CIN XX 014 567
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 931,000 TND 100 % 1 931,000 TND
+Heures supplementaires 4 h 125 % 42,500 TND
+Prime transport Forfait - 70,000 TND
+Cotisation sociale Assiette 9,20 % 177,652 TND
+Retenue fiscale (demo) Assiette 6,00 % 61,860 TND
+RECAPITULATIF
+Brut 2 043,500 TND
+Total retenues 239,512 TND
+NET A PAYER
+1 803,988 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 14/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_15_specimen.pdf — longueur texte: 877
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+EXEMPLE FICTIF - NE PAS UTILISER COMME JUSTIFICATIF
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Hichem Tlili
+Technicien maintenance
+Matricule: EMP-DEMO-015
+PERIODE DE PAIE
+Mars 2027 | Mensuel
+DATE DE PAIEMENT
+31/03/27
+CIN (FORMAT FICTIF)
+INVALIDE 015678
+Rubrique Base Taux Gains Retenues
+Salaire de base 1 968,000 TND 100 % 1 968,000 TND
+Heures supplementaires 8 h 125 % 85,000 TND
+Prime transport Forfait - 80,000 TND
+Cotisation sociale Assiette 9,20 % 181,056 TND
+Retenue fiscale (demo) Assiette 6,00 % 64,080 TND
+RECAPITULATIF
+Brut 2 133,000 TND
+Total retenues 245,136 TND
+NET A PAYER
+1 887,864 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 15/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_16_specimen.pdf — longueur texte: 868
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+Document fictif de demonstration
+BULLETIN 16/20
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Emna Hajri
+Assistante projet
+Matricule: EMP-DEMO-016
+PERIODE DE PAIE
+Du 01 avr. au 30 avr. 2027
+DATE DE PAIEMENT
+30.04.27
+CIN (FORMAT FICTIF)
+D016.789
+Rubrique Base Taux Gains Retenues
+Salaire de base 2 005,000 TND 100 % 2 005,000 TND
+Heures supplementaires 12 h 125 % 127,500 TND
+Prime transport Forfait - 60,000 TND
+Cotisation sociale Assiette 9,20 % 184,460 TND
+Retenue fiscale (demo) Assiette 6,00 % 66,300 TND
+RECAPITULATIF
+Brut 2 192,500 TND
+Total retenues 250,760 TND
+NET A PAYER
+1 941,740 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 16/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_17_specimen.pdf — longueur texte: 852
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+BULLETIN DE SALAIRE
+SPECIMEN PEDAGOGIQUE - SANS VALEUR
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Sami Kammoun
+Controleur gestion
+Matricule: EMP-DEMO-017
+PERIODE DE PAIE
+05.2027
+DATE DE PAIEMENT
+31 mai 2027
+CIN (FORMAT FICTIF)
+SPECIMEN-017890
+Rubrique Base Taux Gains Retenues
+Salaire de base 2 042,000 TND 100 % 2 042,000 TND
+Heures supplementaires 0 h 125 % 0,000 TND
+Prime transport Forfait - 70,000 TND
+Cotisation sociale Assiette 9,20 % 187,864 TND
+Retenue fiscale (demo) Assiette 6,00 % 68,520 TND
+RECAPITULATIF
+Brut 2 112,000 TND
+Total retenues 256,384 TND
+NET A PAYER
+1 855,616 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 17/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_18_specimen.pdf — longueur texte: 857
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+EXEMPLE FICTIF - NE PAS UTILISER COMME JUSTIFICATIF
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Marwa Karray
+Chargee marketing
+Matricule: EMP-DEMO-018
+PERIODE DE PAIE
+Juin-27
+DATE DE PAIEMENT
+2027-06-30
+CIN (FORMAT FICTIF)
+XX 018-901
+Rubrique Base Taux Gains Retenues
+Salaire de base 2 079,000 TND 100 % 2 079,000 TND
+Heures supplementaires 4 h 125 % 42,500 TND
+Prime transport Forfait - 80,000 TND
+Cotisation sociale Assiette 9,20 % 191,268 TND
+Retenue fiscale (demo) Assiette 6,00 % 70,740 TND
+RECAPITULATIF
+Brut 2 201,500 TND
+Total retenues 262,008 TND
+NET A PAYER
+1 939,492 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 18/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_19_specimen.pdf — longueur texte: 882
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+FICHE DE PAIE
+Document fictif de demonstration
+BULLETIN 19/20
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Bilel Zouari
+Superviseur production
+Matricule: EMP-DEMO-019
+PERIODE DE PAIE
+Periode de paie: JUILLET 2027
+DATE DE PAIEMENT
+30/07/2027
+CIN (FORMAT FICTIF)
+DEMO/019 012
+Rubrique Base Taux Gains Retenues
+Salaire de base 2 116,000 TND 100 % 2 116,000 TND
+Heures supplementaires 8 h 125 % 85,000 TND
+Prime transport Forfait - 60,000 TND
+Cotisation sociale Assiette 9,20 % 194,672 TND
+Retenue fiscale (demo) Assiette 6,00 % 72,960 TND
+RECAPITULATIF
+Brut 2 261,000 TND
+Total retenues 267,632 TND
+NET A PAYER
+1 993,368 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 19/20
+
+-- 1 of 1 --
+
+
+======================================================================
+FICHIER: fiche_paie_20_specimen.pdf — longueur texte: 867
+----------------------------------------------------------------------
+SPECIMEN - NON VALIDE
+BULLETIN DE SALAIRE
+SPECIMEN PEDAGOGIQUE - SANS VALEUR
+EMPLOYEUR FICTIF
+Societe Demo Formation SARL
+Adresse: Zone exemple, Tunis
+Matricule fiscal: DEMO-MF-000
+SALARIE(E)
+Asma Rekik
+Gestionnaire paie
+Matricule: EMP-DEMO-020
+PERIODE DE PAIE
+08/2027 (cloture 31/08)
+DATE DE PAIEMENT
+31 AOUT 2027
+CIN (FORMAT FICTIF)
+FICTIF 020123
+Rubrique Base Taux Gains Retenues
+Salaire de base 2 153,000 TND 100 % 2 153,000 TND
+Heures supplementaires 12 h 125 % 127,500 TND
+Prime transport Forfait - 70,000 TND
+Cotisation sociale Assiette 9,20 % 198,076 TND
+Retenue fiscale (demo) Assiette 6,00 % 75,180 TND
+RECAPITULATIF
+Brut 2 350,500 TND
+Total retenues 273,256 TND
+NET A PAYER
+2 077,244 TND
+SPECIMEN FICTIF - CIN VOLONTAIREMENT INVALIDE - AUCUNE VALEUR LEGALE
+Donnees synthetiques creees pour maquette, test ou formation uniquement.
+Page 20/20
+
+-- 1 of 1 --
+
+
