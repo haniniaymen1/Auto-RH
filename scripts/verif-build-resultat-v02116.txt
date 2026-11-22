@@ -1,0 +1,104 @@
+=== BUILD v0.2.116 — 2026-09-29T14:18:14+00:00 ===
+
+> nextjs_tailwind_shadcn_ts@0.2.94 build
+> next build && node scripts/copy-standalone-assets.js
+
+▲ Next.js 16.1.3 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  · proxyClientMaxBodySize: "500mb"
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 57s
+  Skipping validation of types
+  Collecting page data using 1 worker ...
+  Generating static pages using 1 worker (0/33) ...
+  Generating static pages using 1 worker (8/33) 
+  Generating static pages using 1 worker (16/33) 
+  Generating static pages using 1 worker (24/33) 
+✓ Generating static pages using 1 worker (33/33) in 215.5ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api
+├ ƒ /api/auth/change-password
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/demandes
+├ ƒ /api/demandes/[id]
+├ ƒ /api/demandes/[id]/documents/[docId]
+├ ƒ /api/demandes/[id]/repondre
+├ ƒ /api/demandes/journal
+├ ƒ /api/demandes/qr/[reference]/file
+├ ƒ /api/download-formation
+├ ƒ /api/download-matrice
+├ ƒ /api/download-readme
+├ ƒ /api/download-routage
+├ ƒ /api/download-scripts
+├ ƒ /api/mail-config
+├ ƒ /api/payslips
+├ ƒ /api/payslips/[id]
+├ ƒ /api/payslips/[id]/file
+├ ƒ /api/payslips/delete-many
+├ ƒ /api/payslips/employes
+├ ƒ /api/payslips/indexation
+├ ƒ /api/payslips/qr/[id]/file
+├ ƒ /api/payslips/redetect
+├ ƒ /api/payslips/upload
+├ ƒ /api/portal-access
+├ ƒ /api/signature-api/certificat
+├ ƒ /api/signature-api/config
+├ ƒ /api/signature-api/documents
+├ ƒ /api/signature-api/documents/[id]
+├ ƒ /api/signature-api/documents/[id]/verifier
+├ ƒ /api/signature-api/signer
+├ ƒ /api/signature-api/test
+├ ƒ /api/signature-config
+├ ƒ /api/signature-config/certificat
+├ ƒ /api/stats
+├ ƒ /api/users
+├ ƒ /api/users/[id]
+├ ƒ /api/users/[id]/password
+├ ƒ /api/users/[id]/role
+├ ○ /login
+├ ƒ /verification/fiche/[id]
+└ ƒ /verification/reponse/[reference]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[OK] .next/static -> .next/standalone/.next/static
+[OK] public -> .next/standalone/public
+[OK] .env -> .next/standalone/.env
+[OK] node_modules/pdfjs-dist/package.json -> .next/standalone/node_modules/pdfjs-dist/package.json
+[OK] Worker pdf.js copié -> .next/standalone/node_modules/pdfjs-dist
+[OK] Polices standard + cmaps pdf.js copies.
+[OK] node_modules/tesseract.js -> .next/standalone/node_modules/tesseract.js
+[OK] node_modules/tesseract.js-core -> .next/standalone/node_modules/tesseract.js-core
+[OK] node_modules/@napi-rs/canvas -> .next/standalone/node_modules/@napi-rs/canvas
+[OK] node_modules/@napi-rs/canvas-linux-x64-gnu -> .next/standalone/node_modules/@napi-rs/canvas-linux-x64-gnu
+[OK] ocr-data -> .next/standalone/ocr-data
+[OK] Ressources OCR copiees.
+[OK] Alias d'externes matérialisés dans standalone/node_modules : tesseract.js-ed25e4e50289e64d, jszip-974cf2cd4626bd20, pdf-parse-08f4573089f02674, @napi-rs/canvas-1a9ce9c965db10fa, @prisma/client-2c3a283f134fdcb6, sharp-20c6a5da84e2135f, pino-28069d5257187539, fflate-53d47bc6ad26b34f, xlsx-c3c0a7a876112034, mammoth-ea033c5d84d0b9b2, rimraf-ca920c550f67ed39
+[OK] Paquet externe complété : tesseract.js (copie complète)
+[OK] Paquet externe complété : jszip (copie complète)
+[OK] Paquet externe complété : pdf-parse (copie complète)
+[OK] Paquet externe complété : @napi-rs/canvas (copie complète)
+[OK] Paquet externe complété : @prisma/client (copie complète)
+[OK] Paquet externe complété : sharp (copie complète)
+[OK] Dépendances natives @img/* de sharp complétées.
+[OK] Paquet externe complété : pino (copie complète)
+[OK] Paquet externe complété : fflate (copie complète)
+[OK] Paquet externe complété : xlsx (copie complète)
+[OK] Paquet externe complété : mammoth (copie complète)
+[OK] Paquet externe complété : rimraf (copie complète)
+[DONE] Ressources standalone pretes.
+=== EXIT CODE: 0 ===
+VERDICT: BUILD_OK

@@ -1,0 +1,171 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.26 0.03 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.26 0.03 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.26 0.03 265);
+  --primary: oklch(0.511 0.262 276.97);
+  --primary-foreground: oklch(0.985 0.005 270);
+  --secondary: oklch(0.962 0.018 272.314);
+  --secondary-foreground: oklch(0.359 0.144 278.697);
+  --muted: oklch(0.967 0.006 264);
+  --muted-foreground: oklch(0.554 0.03 256);
+  --accent: oklch(0.962 0.018 272.314);
+  --accent-foreground: oklch(0.398 0.195 277.366);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.925 0.012 266);
+  --input: oklch(0.925 0.012 266);
+  --ring: oklch(0.585 0.233 277.117);
+  --chart-1: oklch(0.585 0.233 277.117);
+  --chart-2: oklch(0.705 0.15 232);
+  --chart-3: oklch(0.78 0.13 182);
+  --chart-4: oklch(0.77 0.15 70);
+  --chart-5: oklch(0.65 0.21 356);
+  --sidebar: oklch(0.982 0.008 267);
+  --sidebar-foreground: oklch(0.26 0.03 265);
+  --sidebar-primary: oklch(0.511 0.262 276.97);
+  --sidebar-primary-foreground: oklch(0.985 0.005 270);
+  --sidebar-accent: oklch(0.962 0.018 272.314);
+  --sidebar-accent-foreground: oklch(0.398 0.195 277.366);
+  --sidebar-border: oklch(0.925 0.012 266);
+  --sidebar-ring: oklch(0.585 0.233 277.117);
+}
+
+.dark {
+  --background: oklch(0.17 0.02 270);
+  --foreground: oklch(0.9 0.02 267);
+  --card: oklch(0.21 0.025 270);
+  --card-foreground: oklch(0.9 0.02 267);
+  --popover: oklch(0.21 0.025 270);
+  --popover-foreground: oklch(0.9 0.02 267);
+  --primary: oklch(0.673 0.182 276.935);
+  --primary-foreground: oklch(0.257 0.09 281.288);
+  --secondary: oklch(0.26 0.03 270);
+  --secondary-foreground: oklch(0.9 0.03 273);
+  --muted: oklch(0.26 0.03 270);
+  --muted-foreground: oklch(0.72 0.025 260);
+  --accent: oklch(0.28 0.035 270);
+  --accent-foreground: oklch(0.9 0.03 273);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.673 0.182 276.935);
+  --chart-1: oklch(0.673 0.182 276.935);
+  --chart-2: oklch(0.746 0.16 232.661);
+  --chart-3: oklch(0.777 0.152 181.912);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.712 0.194 338);
+  --sidebar: oklch(0.21 0.025 270);
+  --sidebar-foreground: oklch(0.9 0.02 267);
+  --sidebar-primary: oklch(0.673 0.182 276.935);
+  --sidebar-primary-foreground: oklch(0.257 0.09 281.288);
+  --sidebar-accent: oklch(0.28 0.035 270);
+  --sidebar-accent-foreground: oklch(0.9 0.03 273);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.673 0.182 276.935);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ── v0.2.208 : REBRANDING « AUTO RH » (recoloration du site) ────────────
+ * Nouvelle charte indigo → violet (identité visuelle « Auto RH ») :
+ * primaire #4F46E5 (indigo-600), dégradé de marque
+ * #4338CA → #4F46E5 → #7C3AED → #9333EA → #A855F7.
+ * Les classes emerald-* utilisées par l'admin (166 occurrences) sont
+ * remappées sur la gamme d'indigo — boutons, badges, focus — sans modifier
+ * aucun composant. Le fond de page bg-neutral-50 devient un blanc froid
+ * légèrement teinté (base claire de la nouvelle charte). */
+@theme {
+  --color-emerald-50: #EEF2FF;
+  --color-emerald-100: #E0E7FF;
+  --color-emerald-200: #C7D2FE;
+  --color-emerald-300: #A5B4FC;
+  --color-emerald-400: #818CF8;
+  --color-emerald-500: #6366F1;
+  --color-emerald-600: #4F46E5;
+  --color-emerald-700: #4338CA;
+  --color-emerald-800: #3730A3;
+  --color-emerald-900: #312E81;
+  --color-neutral-50: #F7F8FC;
+}
+
+/* ── DÉGRADÉ COMPLET DE LA MARQUE (fond de page + boutons) ───────────────
+ * FOND DE PAGE : dégradé pâle indigo → lavande, fixé au viewport.
+ * BOUTONS : dégradé de marque sur les classes d'action
+ * (bg-emerald-600 / bg-emerald-700 et variantes hover), texte blanc.
+ * Les teintes pâles (emerald-50/100, badges) restent unies : lisibilité. */
+
+body {
+  background: linear-gradient(160deg, #EEF2FF 0%, #F0F4FF 22%, #EDEAFE 45%, #F1EBFE 68%, #F4F0FE 85%, #F7F4FF 100%) fixed;
+}
+
+.bg-neutral-50 {
+  background: linear-gradient(160deg, #EEF2FF 0%, #F0F4FF 22%, #EDEAFE 45%, #F1EBFE 68%, #F4F0FE 85%, #F7F4FF 100%) fixed;
+}
+
+.bg-emerald-600 {
+  background-color: #4F46E5;
+  background-image: linear-gradient(135deg, #4338CA 0%, #4F46E5 26%, #7C3AED 46%, #9333EA 68%, #A855F7 100%);
+  border-color: transparent;
+}
+
+.bg-emerald-700,
+.hover\:bg-emerald-700:hover {
+  background-color: #4338CA;
+  background-image: linear-gradient(135deg, #312E81 0%, #4338CA 26%, #6D28D9 46%, #7C3AED 68%, #9333EA 100%);
+  border-color: transparent;
+}

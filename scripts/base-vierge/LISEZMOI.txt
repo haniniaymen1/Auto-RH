@@ -1,0 +1,5 @@
+Base de donnees VIERGE (schema Prisma applique, AUCUN compte, aucune
+donnee) — livree dans le ZIP complet comme db/custom.db (v0.2.200 :
+suppression des comptes admin de demonstration, demande utilisateur).
+Regeneree avec : DATABASE_URL=file:/tmp/fresh-db/custom.db
+node node_modules/prisma/build/index.js db push --skip-generate

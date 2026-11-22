@@ -1,0 +1,10 @@
+import fs from "fs";
+const t = fs.readFileSync("scripts/ocr_t1800.txt", "utf8");
+const line = t.split("\n")[3];
+console.log("ligne:", JSON.stringify(line.slice(0, 140)));
+console.log("espaces insécables ?", /\u00a0/.test(line) ? "OUI" : "non");
+const re = /(?:^|\n)[ \t]*(?:[|\]})]?[ \t]*)(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})[ \t]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})[ \t]*(?:[\t|]|$)/;
+console.log("test sur ligne seule:", re.test(line) ? "MATCH" : "AUCUN");
+const reFull = /(?:^|\n)[ \t]*(?:[|\]})]?[ \t]*)(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})[ \t]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})[ \t]*(?:[\t|]|$)/;
+const m = reFull.exec(t);
+console.log("test sur texte complet:", m ? `MATCH "${m[1]} ${m[2]}"` : "AUCUN");

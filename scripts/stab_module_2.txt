@@ -1,0 +1,32 @@
+TUNIS CALL CENTER
+Matricule CNSS : 209 959 - 51
+0 BULLETINDEPAE TT SALAIRE
+01/08/26               31/08/26
+| BATROUE PTE NOM ET PRENOM TT   |         TT FONCTION 7 T CATEGORIE
+| 0masm || amimetrablesi | Teehmiceen Iformatique            1
+(ETATCIVIL |ENFACHARGE| 7" WPONSS              NCN     | Droitacquis | SoldeCongés HJTrav al. Base Th
+| itatre | 0 | mme 14965358 |                              12000 161290
+N°10 rubrique 1    Base   pes | ie | Ps
+“6 Présence            PE 1 12,000         |        LS       |
+10 Salaire de base du mois                             | 12,000 |  1612,190 |           |          879,376           |                           |
+60 Congés payés                        |     7,000 |    73,281 |       /     512,967                      |
+110 Indemnité de présence                     | 19,000 |      2,080 |        |         1,796                           |
+120 Indemnité de transport                    | 19,000 |     36,112         |        31,188                          |
+40 Jours Fériés / Supplémentair               |      1,000 |      75,017         |        75,017                           |
+190 Quote part prime                                         |                  |                                |           590,193                                          |
+Total Brut                                               2090,537
+600 CNSS                                                            2090,537    9,680                                 202,364
+710 Assurance maladie                    |            1425327 | 1,050 |                        14,966     |
+720 Assurance Invalidité Décès                  |                1425,327 | 0,143 |                                 2,038      |
+800 SALAIRE IMPOSABLE                  |                            |     1888,173                        |
+900 IRPP                                            |                                    |                                269,021       |
+950 Retenue CSS                           |                            |                           8,297     |
+|            Total Cotisations                       |                                      |     496,686     |
+1990 Salaire Net                                           |                          1593,851        |
+2100 Net à payer                            |          |                  |     1593,851       |
+70                                 CUOMRERA TS                      1 NUMERO DE COMPTE                            TS               NETAPAYER
+BIAT                                 00008 20000 05040144848 37                       1593,851               |
+   Signature Employé                                                                      |    Cachet Société
+TELEMARKETING
+Au Capital de 1.050.000 DT -                R.C. : 112312 1998                  M.F: 633781K/A/M/000
+Pour vous aider à faire valoir vos droits, conservez ce bulletin de paie sans          limitation de durée.

@@ -1,0 +1,291 @@
+============================================================
+Auto RH (Paiesage) - GUIDE D'INSTALLATION ET DE CHANGEMENT
+DE PORTS - LINUX/macOS ET WINDOWS (v0.2.208)
+============================================================
+
+NOTE (v0.2.205) : le README technique PDF est desormais augmente et
+dedie a ces memes questions - installation, demarrage/arret et ports
+des deux interfaces detailles pas a pas pour Windows ET Linux
+(sections 3.1 a 3.8 du PDF servicerh-readme-technique-v0.2.205.pdf).
+
+CONTENU
+  1) Installation sous LINUX / macOS
+  2) Installation sous WINDOWS
+  3) Compte ADMINISTRATEUR (superadministrateur)
+  4) CHANGER LES PORTS des deux interfaces (Linux et Windows)
+  5) Problemes courants
+
+RAPPEL DES DEUX INTERFACES
+  - Administration RH/IT : interface PROTEGEE PAR LOGIN (gestion des
+    fiches de paie, demandes, utilisateurs). Port = PORT du fichier .env
+    (defaut 4000).
+  - Portail Employes : interface SANS CONNEXION (consultation des
+    bulletins, demandes de signalement). Port = PORTAL_PORT du fichier
+    .env (defaut 4001).
+  Les DEUX ports se changent dans le MEME fichier : le .env a la racine
+  du projet (voir section 4).
+
+Prerequis UNIQUE : Node.js version 20 ou plus recente.
+  - Linux/macOS : https://nodejs.org (ou commande d'installation donnee
+    par le script d'installation Linux).
+  - Windows : installer Node.js depuis https://nodejs.org (version LTS),
+    accepter les options par defaut.
+Utilisez le ZIP COMPLET : service-rh-scripts-site-web-vX.Y.Z.zip
+(le ZIP " leger " est reserve aux developpeurs : sans base prete).
+
+------------------------------------------------------------
+1) INSTALLATION SOUS LINUX / macOS
+------------------------------------------------------------
+Etape 1 - Decompresser le ZIP complet dans un dossier, par exemple :
+    mkdir -p ~/servicerh && cd ~/servicerh
+    unzip ~/Telechargements/service-rh-scripts-site-web-v0.2.201.zip -d .
+Etape 2 - Installer Node.js si besoin (Ubuntu/Debian) :
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    sudo apt install -y nodejs
+  (macOS : brew install node - ou https://nodejs.org)
+Etape 3 - Lancer le script TOUT-EN-UN depuis le dossier du projet :
+    bash INSTALLER-ET-DEMARRER-LINUX-MAC.sh
+  Il fait TOUT, dans l'ordre :
+    - verifie Node.js ;
+    - prepare le fichier .env (base, secret, dossiers, PORT /
+      PORTAL_PORT - lignes ajoutees si absentes) ;
+    - securise les dossiers sensibles ;
+    - installe les dependances (3 a 5 minutes, UNE seule fois) ;
+    - cree la base de donnees SQLite ;
+    - construit le site si necessaire (2 a 4 minutes) ;
+    - CREE LE COMPTE ADMINISTRATEUR : repondez O, donnez l'e-mail, le
+      nom puis le mot de passe (saisie MASQUEE) ;
+    - demarre les DEUX interfaces en arriere-plan et affiche leurs
+      adresses, par exemple :
+        Administration RH/IT : http://localhost:4000  (login)
+        Portail Employes     : http://localhost:4001  (sans login)
+        Acces reseau local   : http://IP-DU-POSTE:4000 et :4001
+  Le terminal peut etre FERME ensuite : les serveurs continuent (nohup).
+  Journaux : paiesage-admin.log et paiesage-portail.log.
+  Arreter : kill <PID_ADMIN> <PID_PORTAIL> (PIDs affiches au demarrage).
+  Relancer plus tard (apres la premiere installation) :
+    bash DEMARRER-TOUT-LINUX-MAC.sh
+  (v0.2.212 : les lanceurs individuels et la famille SILENCIEUX sont
+   supprimes ; mode sans fenetres : bash gestion.sh demarrer-silencieux ;
+   arret : bash ARRETER-LINUX-MAC.sh ou bash gestion.sh arreter.)
+  Creer le compte administrateur PLUS TARD (ou le recree) :
+    bash CREER-SUPERADMIN-LINUX-MAC.sh
+  (menu interactif, NOUVEAU v0.2.201 : voir l'etat des comptes, CREER un
+   superadministrateur, promouvoir un compte existant - equivalent du
+   .bat Windows.)
+
+Mode NON interactif (facultatif, pour un serveur) :
+    SUPERADMIN_EMAIL="admin@entreprise.tn" SUPERADMIN_PASSWORD="MotDePasse!2026" \
+      bash INSTALLER-ET-DEMARRER-LINUX-MAC.sh
+  (SUPERADMIN_NOM="Nom complet" facultatif ; INSTALLER_SANS_ADMIN=1
+   pour passer la creation du compte.)
+
+------------------------------------------------------------
+2) INSTALLATION SOUS WINDOWS
+------------------------------------------------------------
+Etape 1 - Installer Node.js 20+ depuis https://nodejs.org (LTS),
+          options par defaut, puis verifier : ouvrir un invite de
+          commandes et taper  node -v
+Etape 2 - Decompresser le ZIP complet (clic droit -> Extraire tout) dans
+          un dossier simple, SANS accents ni espaces dans le chemin si
+          possible (exemple : C:\servicerh).
+Etape 3 - Double-cliquer  DEMARRER-TOUT-WINDOWS.bat
+          Premiere fois : il installe les dependances, cree la base,
+          construit le site (3 a 5 minutes), puis ouvre DEUX fenetres :
+          administration sur http://localhost:PORT (PORT du .env, defaut
+          4000) et portail employes sur http://localhost:PORTAL_PORT
+          (defaut 4001). Le navigateur s'ouvre automatiquement sur les
+          deux interfaces. Fenetres a laisser ouvertes pendant
+          l'utilisation - les fermer arrete les serveurs.
+  Variante silencieuse (pas de fenetres) : GESTION.bat demarrer-silencieux
+  (service en tache de fond ; ARRETER-WINDOWS.bat pour stopper).
+  (v0.2.212 : DEMARRER-WINDOWS.bat, DEMARRER-PORTAIL-WINDOWS.bat et les
+   .vbs SILENCIEUX ont ete supprimes - un seul lanceur Windows.)
+Etape 5 - Creer le compte ADMINISTRATEUR : double-cliquer
+          CREER-SUPERADMIN-WINDOWS.bat
+          Menu interactif :
+            1 - Voir l'etat des comptes (RH / IT / Superadmin)
+            2 - CREER un compte superadministrateur
+            3 - Promouvoir un compte existant
+          Choisissez 2, donnez l'e-mail, le nom puis le mot de passe
+          (saisie masquee). Ce compte se connecte a l'administration ;
+          il gere ensuite les comptes RH et IT depuis l'onglet
+          " Utilisateurs ".
+Acces depuis les autres PC du reseau : http://IP-DU-PC:PORT
+  (l'IP s'affiche aussi au demarrage ; autoriser le port dans le
+   pare-feu Windows si necessaire).
+
+------------------------------------------------------------
+3) COMPTE ADMINISTRATEUR - RAPPELS
+------------------------------------------------------------
+- La base de donnees livree dans le ZIP est VIERGE : AUCUN compte
+  n'existe (les anciens comptes de demonstration ont ete supprimes,
+  v0.2.200).
+- Le PREMIER compte a creer est l'administrateur (superadministrateur) :
+  Linux/macOS : cree automatiquement par le script d'installation
+                (question " Creer le compte maintenant ? "), ou plus
+                tard : bash CREER-SUPERADMIN-LINUX-MAC.sh
+                (menu interactif, NOUVEAU v0.2.201 - meme menu que sous
+                 Windows : etat des comptes, CREER un superadministrateur,
+                 promouvoir un compte existant, quitter)
+  Windows     : CREER-SUPERADMIN-WINDOWS.bat (menu, choix 2).
+- Le superadministrateur ne peut PAS etre cree par l'inscription
+  publique : c'est le seul a pouvoir creer/reactiver/supprimer les
+  comptes RH et IT depuis l'onglet " Utilisateurs ".
+- Politique de mot de passe : 8 caracteres minimum, au moins une
+  minuscule, une MAJUSCULE, un chiffre et un symbole (ex. !@#$%*+=?).
+
+------------------------------------------------------------
+4) CHANGER LES PORTS DES DEUX INTERFACES (LINUX ET WINDOWS)
+------------------------------------------------------------
+Les deux interfaces lisent LE MEME FICHIER : .env a la racine du projet.
+  PORT         = port de l'ADMINISTRATION RH/IT (defaut 4000)
+  PORTAL_PORT  = port du PORTAIL EMPLOYES     (defaut 4001)
+Les deux valeurs DOIVENT etre DIFFERENTES. Si la ligne est absente,
+les lanceurs l'ajoutent automatiquement avec la valeur par defaut ;
+vous n'avez plus qu'a la modifier.
+
+Procedure (identique sur les deux systemes) :
+  Etape 1 - Ouvrir le fichier .env a la racine du projet :
+            Windows : clic droit -> Ouvrir avec -> Bloc-notes
+            Linux   : nano .env   (ou gedit / vim)
+  Etape 2 - Modifier (ou ajouter) les DEUX lignes, par exemple :
+            PORT=8080
+            PORTAL_PORT=8081
+            (une valeur par ligne, SANS espaces avant le " = ", SANS
+             guillemets ; jamais la MEME valeur pour les deux.)
+  Etape 3 - Enregistrer, puis RELANCER les interfaces :
+            Linux   : bash DEMARRER-TOUT-LINUX-MAC.sh
+                      (ou bash INSTALLER-ET-DEMARRER-LINUX-MAC.sh)
+                      v0.2.212 : plus besoin de fermer d'abord les
+                      serveurs - le lanceur arrete AUTOMATIQUEMENT les
+                      anciennes instances encore lancees sur les anciens
+                      ports (migration des ports), puis demarre sur les
+                      nouveaux.
+            Windows : relancer DEMARRER-TOUT-WINDOWS.bat - meme migration
+                      automatique des anciens ports. Utiliser ensuite les
+                      NOUVEAUX liens affiches et fermer les anciens
+                      onglets du navigateur.
+                      Les lanceurs relisent le .env a chaque demarrage :
+                      le nouveau port est pris en compte automatiquement.
+  Etape 4 - Verifier : les adresses affichees au demarrage utilisent les
+            nouveaux ports (http://localhost:8080 et :8081 dans
+            l'exemple).
+
+Notes :
+  - Ces ports sont LOCAUX : pour un acces depuis un autre PC du reseau,
+    utiliser http://IP-DU-PC:PORT (ouvrir/autoriser le port dans le
+    pare-feu).
+  - Ne pas choisir un port deja utilise par un autre logiciel
+    (message d'erreur typique : EADDRINUSE / " adresse deja occupee ") :
+    en choisir un autre dans le .env et relancer.
+  - Les variables PAIESAGE_PORT_ADMIN / PAIESAGE_PORT_PORTAIL (service
+    Windows silencieux) restent PRIORITAIRES sur le .env si elles sont
+    definies : ne pas les confondre, le .env suffit dans 100 % des cas.
+
+------------------------------------------------------------
+5) PROBLEMES COURANTS
+------------------------------------------------------------
+- " Error: Could not find a production build in the './.next'
+  directory " (administration, le site ne demarre pas) : CORRIGE a
+  partir de la v0.2.207 - le build etait INCOMPLET (fenetre fermee
+  pendant la premiere construction de 2 a 4 minutes) et toutes les
+  gardes ne verifiaient que l'existence de server.js. Desormais le
+  verificateur controle un build COMPLET (server.js + BUILD_ID + marque
+  de version) et le site SE RECONSTRUIT AUTOMATIQUEMENT au lancement
+  (2 a 4 minutes, une seule fois) - y compris depuis le demarrage
+  silencieux qui ne verifiait rien. Le build utilise le next LOCAL
+  (jamais de telechargement). Ne fermez PAS la fenetre pendant la
+  construction ; si elle a ete fermee, relancez simplement le lanceur :
+  la construction reprend du debut.
+- Le lanceur dit " deja en cours " mais la page ne s'ouvre pas (v0.2.206,
+  Linux) : CORRIGE - l'ancien controle disait " deja en cours " des qu'un
+  programme quelconque repondait sur le port. Desormais le lanceur
+  identifie QUI ecoute le port : votre instance qui repond vraiment ->
+  NON relancee (normal) ; instance a nous MUETTE ou en ERREUR (page
+  morte, HTTP 5xx) -> ARRET PRECIS puis RELANCE automatique ; port
+  occupe par un AUTRE programme (autre dossier extrait, autre logiciel)
+  -> RIEN n'est tue, message avec le PID, la commande et la remediation
+  (kill <PID> ou changer PORT / PORTAL_PORT dans le .env). Le moteur
+  d'arret (scripts/service-paiesage.js stop) arrete aussi desormais les
+  instances muettes (il ne se fiait plus qu'au HTTP) et verifie la
+  liberation par l'etat d'ecoute reel des ports.
+- " EADDRINUSE " ou " adresse deja occupee " : le port est pris par un
+  autre programme OU une ancienne instance tourne encore -> v0.2.212 :
+  les lanceurs TOUT arrentent automatiquement les ANCIENNES instances de
+  cette application encore lancees sur d'anciens ports (migration des
+  ports, scripts/migrer-ports.js). Si le port est pris par un AUTRE
+  programme : l'arreter ou choisir un autre port dans le .env.
+  (L'ancienne fiche " PREPARER-PAIESAGE-SILENCIEUX.bat introuvable "
+  concerne la v0.2.203 : les .vbs silencieux ont ete supprimes en
+  v0.2.212 - utilisez GESTION.bat demarrer-silencieux.)
+- " Node.js n'est pas installe " : installer Node.js 20+ puis relancer.
+- " Environment variable not found: DATABASE_URL " (Prisma, pendant la
+  creation de la base) : CORRIGE a partir de la v0.2.202 - les lanceurs
+  " TOUT " (DEMARRER-TOUT-WINDOWS.bat / DEMARRER-TOUT-LINUX-MAC.sh)
+  preparent desormais le fichier .env AVANT la creation de la base.
+  Si le message apparait quand meme (ancienne version) : relancer
+  simplement le lanceur, il recree/complete le .env a chaque demarrage.
+- Page blanche au premier chargement : le site se construit a la volee
+  (production) -> attendre quelques dizaines de secondes puis recharger.
+- La fenetre Windows se ferme aussitot avec une erreur : lire le message
+  affiche ; causes frequentes = ZIP non decomprime, Node absent, dossier
+  deplace apres installation -> relancer le .bat (il retoutverifie).
+- Le mot de passe saisie ne s'affiche pas : NORMAL (saisie masquee).
+- Compte oublie : un superadministrateur peut reinitialiser le mot de
+  passe de n'importe quel compte depuis l'onglet " Utilisateurs " ;
+  sans aucun compte valide : bash CREER-SUPERADMIN-LINUX-MAC.sh
+  (Linux/macOS) ou CREER-SUPERADMIN-WINDOWS.bat (Windows).
+
+------------------------------------------------------------
+6) DEMARRAGE ET ARRET SILENCIEUX (ARRIERE-PLAN) - v0.2.203
+------------------------------------------------------------
+Le mode silencieux fait tourner les deux interfaces EN ARRIERE-PLAN :
+aucune fenetre CMD/PowerShell/Bash, aucun popup, aucun message de
+confirmation. Tout est journalise dans des fichiers (rien ne s'affiche
+jamais tout seul). Les PIDs sont enregistres : l'arret ne touche QUE
+les processus du serveur (JAMAIS de kill/taskkill global), verifie que
+les ports sont libres et refuse les doubles instances.
+
+WINDOWS (double-clic, tout est silencieux) :
+  DEMARRER-SILENCIEUX-WINDOWS.vbs : demarre en arriere-plan (rend la
+    main aussitot ; cree aussi, une seule fois et sans fenetre, le
+    raccourci de demarrage automatique a l'ouverture de session).
+    Depuis la v0.2.204 il est AUTONOME : s'il manque un fichier dans le
+    dossier, il descend automatiquement a l'etage suivant (bat canonique
+    -> ancien bat -> moteur direct) au lieu d'afficher une erreur ;
+  ARRETER-SILENCIEUX-WINDOWS.vbs  : arrete proprement les serveurs ;
+  ETAT-SILENCIEUX-WINDOWS.vbs     : etat des serveurs (a votre
+    initiative : c'est la SEULE fenetre prevue, jamais automatique) ;
+  JOURNAUX-SILENCIEUX-WINDOWS.vbs : ouvre les fichiers de journal.
+  Etats et journaux ecrits dans logs\ : demarrage-etat.txt,
+  arret-etat.txt, etat-actuel.txt, paiesage-administration.log,
+  paiesage-portail.log.
+
+LINUX / macOS (terminal ferme des que la commande est lancee) :
+  bash DEMARRER-SILENCIEUX-LINUX-MAC.sh : demarre en arriere-plan
+    (rend la main aussitot) ;
+  bash ARRETER-SILENCIEUX-LINUX-MAC.sh  : arrete proprement ;
+  bash ETAT-SILENCIEUX-LINUX-MAC.sh     : etat des serveurs ;
+  bash JOURNAUX-SILENCIEUX-LINUX-MAC.sh : dernieres lignes des
+    journaux.
+  Journaux : logs/paiesage-silencieux.log (preparation), puis
+  paiesage-admin.log et paiesage-portail.log (serveurs), et les memes
+  fichiers d'etat logs/*.txt que sous Windows.
+
+PRECISION DE L'ARRET (les deux systemes, v0.2.203) :
+  - 1) arret des PIDs ENREGISTRES par le demarrage silencieux (arbre
+    des processus inclus) ;
+  - 2) sinon, detection des processus a l'ecoute des PORTS du .env
+    (netstat -ano sous Windows, ss/lsof sous Linux) AVEC controle que
+    le processus est bien node/node.exe : un autre programme qui
+    occuperait le port n'est JAMAIS arrete (il est signale) ;
+  - 3) verification finale que les ports sont LIBRES (aucun processus
+    residuel du serveur) ;
+  - les serveurs gerent aussi le signal d'arret (SIGTERM) : journal
+    " arret du serveur " puis liberation du port.
+Les lanceurs classiques (DEMARRER-TOUT-LINUX-MAC.sh) enregistrent
+aussi leurs PIDs depuis la v0.2.203 : l'arret silencieux fonctionne
+quel que soit le mode de demarrage utilise.
+
+Fin du guide - v0.2.208.

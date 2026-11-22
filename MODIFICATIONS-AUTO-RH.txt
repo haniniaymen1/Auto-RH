@@ -1,0 +1,418 @@
+REBRANDING « AUTO RH » — v0.2.208 (basée sur v0.2.207)
+========================================================
+
+Livrable : application complète inchangée fonctionnellement,
+rebrandée et relookée. Aucune donnée, base, session ou configuration
+existante n'est affectée.
+
+1. NOUVEAU NOM — « ServiceRH » devient « Auto RH »
+--------------------------------------------------
+Renommé partout où le nom du produit apparaît :
+  - Onglet du navigateur et métadonnées : « Auto RH | Fiches de paie
+    et demandes RH » ;
+  - En-tête de l'administration, page de connexion, écran de première
+    connexion (changement de mot de passe), pages publiques de
+    vérification (fiche / réponse) ;
+  - Portail employés : titres de pages, bandeau de marque des 4 écrans
+    (connexion, nouveau mot de passe, première connexion, accueil) ;
+  - E-mails automatiques : expéditeur affiché, sujets, corps texte et
+    HTML (accès portail, création / réactivation de compte, demandes
+    administratives, e-mail de test SMTP) ;
+  - Documents générés : tampon « Auto RH — Fiche de paie », « Auto RH —
+    Document officiel », mentions de signature électronique, propriétés
+    des PDF et Excel (producteur / créateur) ;
+  - Application d'authentification (TOTP) : émetteur « Auto RH » ;
+  - Messages de diagnostic et bannières des outils livrés ;
+  - Documentation (README-DEPLOIEMENT-LOCAL.md,
+    GUIDE-INSTALLATION-LINUX-WINDOWS.txt).
+
+Conservés volontairement (fonctionnement et compatibilité) :
+  - Variables d'environnement SERVICE_RH_* ( Racine, STORAGE_DIR,
+    STORAGE_KEY, OCR_LANG_PATH, STORAGE_DISABLE…) : vos fichiers .env
+    et déploiements Docker restent valables sans aucune modification ;
+  - Cookie de session « service_rh_session » : les utilisateurs
+    connectés ne sont pas déconnectés ;
+  - En-tête SMTP « X-Service RH-Systeme » : la détection des e-mails
+    du système est préservée ;
+  - Noms de fichiers d'export livrés (ServiceRH-Map-routage*.xlsx,
+    ServiceRH-Matrice-roles*.xlsx, readme technique) : toujours
+    reconnus ; les variantes « Auto RH-… » sont acceptées en plus ;
+  - Les phrases désignant l'équipe RH (« le service RH »,
+    « E-mail du service RH (attestations) ») décrivent le service de
+    l'entreprise destinataire, pas le produit : elles restent
+    inchangées pour garder un français correct.
+
+2. NOUVELLE CHARTE GRAPHIQUE — indigo → violet
+----------------------------------------------
+  - Couleur primaire #4F46E5 (indigo 600), dégradé de marque
+    #4338CA → #4F46E5 → #7C3AED → #9333EA → #A855F7 ;
+  - Fond de page : dégradé pâle indigo → lavande (clair) / nuit
+    indigo (sombre) ;
+  - Boutons, badges, focus, menus, graphiques : remappés sur la gamme
+    indigo (classes emerald-* et variables de thème) ;
+  - Portail employés : les ~230 valeurs de couleurs de l'ancien
+    dégradé orange-rose-violet sont remplacées par la nouvelle
+    palette (bannières, boutons, boîtes d'information, liens) ;
+  - E-mails automatiques : bandeaux d'en-tête et accents passent au
+    indigo de la charte (les couleurs sémantiques restent : vert =
+    accepté, rouge = refusé, ambre = information) ;
+  - Poignées de redimensionnement des tableaux : indigo.
+
+3. NOUVEAUX LOGOS ET FAVICON
+----------------------------
+Nouveau symbole « Auto RH » : engrenage (automatisation) + profil
+humain (RH) sur dégradé indigo-violet, wordmark « Auto » (encre
+indigo foncé) + « RH » (violet) :
+  - public/logo-trailmix.png : logo horizontal (interface + connexion
+    + portail) — remplacé par le nouveau visuel ;
+  - public/logo.svg : version vectorielle du même logo ;
+  - public/icon-trailmix-192.png : icône application 512×512 ;
+  - public/apple-touch-icon.png : 180×180 ;
+  - public/favicon.ico : 16 / 32 / 48.
+Les NOMS de fichiers sont conservés : toutes les références du code
+continuent de fonctionner sans modification (y compris les exclusions
+du middleware). Les fichiers historiques fiche-icon.svg/.png ne sont
+plus affichés nulle part et restent inchangés.
+
+4. VÉRIFICATIONS EFFECTUÉES
+---------------------------
+  - Compilation TypeScript : même résultat que la version d'origine
+    (52 erreurs strictes préexistantes, aucune nouvelle) ;
+  - Build de production Next.js : réussi, toutes les routes présentes ;
+  - Démarrage réel testé : administration (next start) et portail
+    employés (portail-server.js) — pages servies avec le nouveau nom,
+    le nouveau logo et la nouvelle charte ;
+  - Identification des réponses e-mail : par Message-ID et référence
+    DEM-AAAA-NNNNN du sujet — inchangée par le renommage ;
+  - Base de données, chiffrement du stockage, clés : aucun schéma ni
+    algorithme modifié.
+
+VERSION : 0.2.208 (rebranding visuel — aucune évolution fonctionnelle).
+
+================================================================================
+VERSION 0.2.209 — Démarrage, administration et gestion des ports (Win + Linux)
+================================================================================
+Objet : système de gestion du démarrage multiplateforme, création automatique
+du superadministrateur et gestion dynamique des ports par le fichier .env.
+
+1. GESTION UNIFIÉE (NOUVEAU)
+----------------------------
+  - gestion.sh (Linux/macOS) et GESTION.bat → gestion.ps1 (Windows) :
+    un point d'entrée unique — demarrer / demarrer-silencieux (arrière-plan
+    détaché) / arreter / redemarrer / etat / journaux / ports / superadmin /
+    installer / aide. Les PORTS sont lus dans le .env (aucun port codé en
+    dur ; défauts 4000/4001 uniquement si le .env est absent).
+
+2. VÉRIFICATEUR DE PORTS (NOUVEAU : scripts/verifier-ports.js)
+--------------------------------------------------------------
+  Lit le .env (PAIESAGE_PORT_ADMIN > PORT > 4000 ; PAIESAGE_PORT_PORTAIL >
+  PORTAL_PORT > 4001), contrôle la disponibilité AVANT lancement, identifie
+  le propriétaire du port (PIDs enregistrés logs/paiesage-processus.json +
+  ligne de commande, via netstat/Windows, ss, lsof ou /proc/net/tcp) et
+  affiche l'état HTTP. Modes : verifier [port ciblé] / etat / liste.
+  Codes : 0 libre (ou à nous) ; 1 conflit AUTRE programme ; 2 déjà en cours.
+  RIEN n'est jamais tué en cas de conflit : message + PID + remédiation.
+
+3. LANCEURS — PORTS ET VÉRIFICATION (MODIFIÉS)
+----------------------------------------------
+  Linux : DEMARRER-LINUX-MAC.sh, DEMARRER-PORTAIL-LINUX-MAC.sh,
+          DEMARRER-TOUT-LINUX-MAC.sh, INSTALLER-ET-DEMARRER-LINUX-MAC.sh
+  Windows : DEMARRER-WINDOWS.bat, DEMARRER-PORTAIL-WINDOWS.bat,
+            DEMARRER-TOUT-WINDOWS.bat
+  - PORT / PORTAL_PORT lus du .env ; lignes ÉCRITES dans le .env si absentes
+    (idempotent, valeur utilisateur JAMAIS écrasée) — défauts alignés sur
+    4000/4001 partout (moteur, lanceurs, vérificateur, documentation) ;
+  - vérification de disponibilité AVANT lancement (échec rapide et clair) ;
+  - DEMARRER-TOUT-WINDOWS.bat : création automatique du superadmin ajoutée
+    (identique à Linux), écriture idempotente des ports, contrôle des deux
+    ports avant l'ouverture des fenêtres ;
+  - diagnostic du lanceur TOUT Linux : l'appartenance d'un port se juge par
+    les PIDs ENREGISTRÉS et la ligne de commande (start-prod.js /
+    standalone/server.js / portail-server.js / next-server) — un « node »
+    étranger lancé dans le dossier n'est plus confondu avec l'application ;
+  - scripts/start-prod.js : le .env est chargé AVANT l'application du défaut
+    PORT (correctif : une ligne PORT du .env était ignorée en démarrage
+    direct) ; défaut 3000 → 4000 ;
+  - portail-server.js : défaut 4001 confirmé, commentaire aligné.
+
+4. SUPERADMINISTRATEUR AUTOMATIQUE (MODIFIÉ : scripts/creer-superadmin.js)
+-------------------------------------------------------------------------
+  Mode --assurer appelé par TOUS les lanceurs (Linux et Windows) au premier
+  démarrage sur base vierge :
+  - auto-suffisant : crée la base (prisma db push) et le .env (DATABASE_URL)
+    s'ils manquent, et fournit un DATABASE_URL par défaut — il fonctionne
+    même appelé sans lanceur (gestion.sh superadmin, cron) ;
+  - honore LUI-MÊME la politique SUPERADMIN_AUTO=0 (double protection avec
+    les lanceurs) ;
+  - idempotent : rien n'est créé si un compte SUPERADMIN actif existe
+    (anti-doublon) ; identité configurable par SUPERADMIN_EMAIL /
+    SUPERADMIN_PASSWORD dans le .env, sinon mot de passe aléatoire affiché
+    une fois et consigné dans logs/compte-superadmin-initial.txt.
+
+5. DOCUMENTATION (MODIFIÉE)
+---------------------------
+  .env.example (section PORTS — source unique de vérité + SUPERADMIN_AUTO),
+  GUIDE-INSTALLATION-LINUX-WINDOWS.txt et README-DEPLOIEMENT-LOCAL.md
+  (défauts 4000/4001, Gestion unifiée), package.json (version 0.2.209).
+
+6. VALIDATION (batterie scripts/test_v0209_ports.sh — LINUX, 37 contrôles)
+--------------------------------------------------------------------------
+  T1 premier démarrage base vierge : défauts 4000/4001 écrits dans le .env,
+     superadmin créé, les deux interfaces répondent ;
+  T2 relance : interfaces conservées (GARDE), toujours 1 seul superadmin ;
+  T3 ports personnalisés 5100/5101 : repris par le moteur, le vérificateur
+     et l'état au prochain démarrage ;
+  T4 conflit (autre programme sur 5100) : code 1, identification PID,
+     rien n'est tué, lanceurs en échec propre AVANT l'installation ;
+  T5 démarrage direct start-prod.js : ligne PORT du .env honorée ;
+  T6 identité superadmin par .env (connexion API → 200, mot de passe non
+     consigné) et SUPERADMIN_AUTO=0 (aucune création) ;
+  T7 cycle gestion.sh : demarrer-silencieux / etat / journaux / redemarrer
+     (nouveaux PIDs) / ports / arreter (ports libérés).
+  Windows : mêmes mécanismes (lecture .env findstr, verifier-ports.js
+  multiplateforme) — scripts .bat revus sans parenthèses non échappées
+  dans les blocs if, non exécutables dans cet environnement Linux.
+
+VERSION : 0.2.209 (démarrage/ports/superadmin — aucun changement de schéma).
+
+================================================================================
+v0.2.210 — SCRIPTS D'ARRÊT DÉDIÉS (ARRETER) + GUIDE PDF INSTALLATION/UTILISATION
+================================================================================
+
+1. NOUVEAUX SCRIPTS D'ARRÊT (demande utilisateur : « j'ai oublié de créer
+   script pour arrêt pour Windows et Linux »)
+------------------------------------------------------------
+  ARRETER-WINDOWS.bat   (NOUVEAU) — double-clic sous Windows : arrêt PROPRE
+     des deux interfaces en 3 étapes affichées (détection Node.js, lecture des
+     ports du .env, arrêt + vérification finale que les ports sont libres).
+  ARRETER-LINUX-MAC.sh  (NOUVEAU) — « bash ARRETER-LINUX-MAC.sh » sous
+     Linux/macOS : mêmes 3 étapes, messages et vérifications identiques.
+  Les deux délèguent au moteur éprouvé « node scripts/service-paiesage.js
+  stop » (arrêt PRÉCIS par PID enregistré, repli par ports : seuls les
+  processus Node de CE projet sont arrêtés — jamais un autre programme,
+  jamais de taskkill/killall global) puis revérifient chaque port avec
+  scripts/verifier-ports.js :
+     code 0 → « ports libres » ; code 2 → « arrêt INCOMPLET, relancez le
+     script / consultez logs/arret-etat.txt » ; code 1 → « port occupé par un
+     AUTRE programme, identifiez-le avec gestion ports » (rien n'est tué).
+  Le résultat reste journalisé dans logs/arret-etat.txt.
+
+2. COHÉRENCE DES PORTS
+----------------------
+  Comme tous les lanceurs v0.2.209, les scripts d'arrêt lisent les ports dans
+  le .env avec la même priorité que gestion.sh / service-paiesage.js :
+  PAIESAGE_PORT_ADMIN > PORT > 4000 et PAIESAGE_PORT_PORTAIL >
+  PORTAL_PORT > 4001 (aucun port codé en dur).
+
+3. GUIDE PDF (NOUVEAU : GUIDE-INSTALLATION-UTILISATION-WINDOWS-LINUX.pdf)
+------------------------------------------------------------------------
+  Guide officiel de 13 pages livré à la racine du projet : installation pas à
+  pas sous Windows (chap. 2) et Linux/macOS (chap. 3), première connexion et
+  superadministrateur (chap. 4), démarrage quotidien et mode silencieux
+  (chap. 5), ARRÊT des services avec les nouveaux scripts ARRETER (chap. 6),
+  console de gestion (chap. 7), CHANGEMENT DE PORT complet avec .env, conflits
+  et conseils (chap. 8), dépannage (chap. 9), sécurité/sauvegarde/mise à jour
+  (chap. 10), récapitulatif express en dernière page.
+
+4. VERSIONS
+-----------
+  package.json et VERSION : 0.2.210 (le prochain démarrage reconstruira le
+  build, comme prévu après chaque montée de version).
+
+5. VALIDATION (Linux)
+---------------------
+  - arrêt à chaud : les deux interfaces (4000/4001) répondent → script →
+    « Arret termine : les ports 4000 et 4001 sont libres », état HTTP sans
+    réponse, code retour 0 ;
+  - arrêt à froid (rien ne tourne) : idempotent, code retour 0 ;
+  - ports personnalisés : PORT=4010 dans le .env → le script affiche
+    « administration=4010, portail=4001 », arrête le service et libère 4010 ;
+  - Windows : logique identique aux .bat v0.2.209 (findstr, verifier-ports.js
+    multiplateforme) — non exécutable dans cet environnement Linux.
+
+VERSION : 0.2.210 (arrêt dédié Windows/Linux + guide PDF — aucun changement
+de schéma ni de moteur : le moteur d'arrêt service-paiesage.js est inchangé).
+
+================================================================================
+v0.2.211 — SCRIPTS CRÉER-SUPERADMIN REMIS À NIVEAU (Windows + Linux)
+================================================================================
+
+1. DEMANDE UTILISATEUR
+----------------------
+  « création compte superadmin avec script pour Windows et Linux comme
+  existe dans projet » : les deux scripts CREER-SUPERADMIN-*.bat/.sh
+  existaient depuis la Task 34 / v0.2.201 mais portaient encore des
+  références obsolètes. Ils sont rafraîchis, rebrandés et re-documentés.
+
+2. CREER-SUPERADMIN-WINDOWS.bat (MODIFIÉ)
+----------------------------------------
+  - marque « SERVICE RH » → « AUTO RH (PaieSage) » (titre de fenêtre,
+  messages) ; référence « port 3000 » (obsolète) → « http://localhost:PORT
+  du fichier .env - 4000 par defaut » ;
+  - erreur d'installation : renvoi vers DEMARRER-TOUT-WINDOWS.bat (au lieu
+  de DEMARRER-SILENCIEUX-WINDOWS.vbs seul) ;
+  - documentation du mode DIRECT sans menu : GESTION.bat superadmin --creer
+  --email … --password … et de la règle de mot de passe (8 caractères min,
+  majuscule, minuscule, chiffre, symbole) ;
+  - rappel de l'idempotence v0.2.209 (compte déjà créé automatiquement au
+  premier démarrage — ce script ne crée jamais de doublon) ;
+  - structure éprouvée conservée : flux goto simples, chcp 65001, AUCUNE
+  parenthèse dans tout le fichier (vérifié par grep).
+
+3. CREER-SUPERADMIN-LINUX-MAC.sh (MODIFIÉ)
+------------------------------------------
+  - en-tête rebrandé AUTO RH (PaieSage), v0.2.211 ; référence du ZIP obsolète
+  « service-rh-scripts-site-web-v0.2.201.zip » → « site-web-Auto-RH-v0.2.211.zip » ;
+  - mode DIRECT documenté : bash gestion.sh superadmin --creer … ;
+  - erreur d'installation : précision « 3 à 5 minutes au premier lancement » ;
+  - garde-fous inchangés (Node présent, ZIP extrait, node_modules installés).
+
+4. scripts/creer-superadmin.js (MODIFIÉ, cosmétique)
+----------------------------------------------------
+  Bannière du menu interactif : « SERVICE RH — Superadministrateur (Task 34) »
+  → « AUTO RH (PaieSage) — Superadministrateur ». Aucune logique changée :
+  menu (état / créer / promouvoir), --creer, --promouvoir, --statut,
+  --assurer idempotent conservés à l'identique.
+
+5. VERSIONS
+-----------
+  package.json et VERSION : 0.2.211.
+
+6. VALIDATION (Linux)
+---------------------
+  - bash CREER-SUPERADMIN-LINUX-MAC.sh : garde-fous franchis, menu affiché
+  avec la nouvelle bannière, sortie propre (RC=0) ;
+  - node scripts/creer-superadmin.js --creer (compte de test) : «
+  Superadministrateur CRÉÉ », visible ensuite dans --statut (2 actifs), puis
+  suppression du compte de test en base (retour à 1 actif : admin@auto-rh.local) ;
+  - doublon : création sur un email déjà SUPERADMIN → message explicite
+  « Un compte existe déjà avec cet email (SUPERADMIN) », code retour 1 ;
+  - validations d'entrée vérifiées au passage (nom trop court → message) ;
+  - Windows : structure .bat inchangée (parenthèses vérifiées absentes),
+  non exécutable dans cet environnement Linux.
+
+VERSION : 0.2.211 (remise à niveau CREER-SUPERADMIN Windows/Linux + bannière
+moteur — aucune logique ni schéma modifiés).
+
+================================================================================
+v0.2.212 — CHANGEMENT DE PORT AUTOMATIQUE + NETTOYAGE DES LANCEURS
+================================================================================
+
+1. DEMANDE UTILISATEUR
+----------------------
+  « J'ai changé le port, encore ne fonctionne pas » + « supprimer les
+  scripts de démarrage redondants ou inutiles pour Windows ou Linux ».
+
+2. DIAGNOSTIC DU CHANGEMENT DE PORT (tests réels, Linux)
+--------------------------------------------------------
+  - moteur (service-paiesage.js start) : applique déjà le changement de
+  port proprement (anciens ports libérés) ;
+  - DEMARRER-TOUT-LINUX-MAC.sh : BUG CONFIRMÉ — après modification du
+  .env, il démarrait les serveurs sur les NOUVEAUX ports en laissant
+  les ANCIENNES instances orphelines (4 serveurs simultanés constatés :
+  4000/4001 et 4020/4021 répondaient en même temps ; PID de l'ancienne
+  génération écrasé dans logs/paiesage-processus.json, donc jamais
+  arrêté). C'est la cause perçue « le changement de port ne fonctionne
+  pas » : anciens liens encore vivants, état incohérent.
+
+3. CORRECTIF : scripts/migrer-ports.js (NOUVEAU)
+------------------------------------------------
+  Appelé PAR LES LANCEURS AVANT LE DÉMARRAGE (Windows + Linux) :
+  lit les ports ACTUELS du .env, lit les PIDs du démarrage précédent
+  (logs/paiesage-processus.json), trouve pour chaque PID vivant le port
+  qu'il écoute réellement (netstat/lsof/ss) ; si ce port n'est PLUS
+  celui du .env → instance de l'ANCIENNE configuration → arrêt de
+  l'arbre complet (parent + enfant, SIGTERM puis SIGKILL au besoin,
+  taskkill /T /F sous Windows). Instance déjà sur le port actuel :
+  conservée (le lanceur décide ensuite GARDE/LANCE). Toujours exit 0,
+  ne bloque jamais. Lecture .env tolérante (espaces, guillemets).
+
+4. LANCEURS AUTONOMES (les lanceurs individuels sont supprimés)
+---------------------------------------------------------------
+  - DEMARRER-TOUT-WINDOWS.bat (RÉÉCRIT) : appelle migrer-ports.js,
+  crée AUTH_SECRET s'il manque, securiser-auto, superadmin --assurer,
+  build de production UNE fois avant l'ouverture (avant : chaque
+  fenêtre construisait de son côté), puis lance les serveurs DIRECTS
+  (start-prod.js / portail-server.js dans leurs fenêtres cmd /k) et
+  ouvre le navigateur sur les deux interfaces. Lecture des ports
+  tolérante (%%~b + trim). Aucune parenthèse dans les echo/REM.
+  - DEMARRER-TOUT-LINUX-MAC.sh (MODIFIÉ) : migrer-ports.js, AUTH_SECRET
+  ici s'il manque, build UNE fois avant lancement, serveurs DIRECTS
+  (nohup node scripts/start-prod.js / portail-server.js) au lieu des
+  lanceurs individuels supprimés ; lecture des ports tolérante
+  (espaces/guillemets) ; message d'arrêt mis à jour.
+  - INSTALLER-ET-DEMARRER-LINUX-MAC.sh (MODIFIÉ) : migrer-ports.js
+  avant lancement, lecture des ports tolérante, message d'arrêt à jour.
+  - ARRETER-WINDOWS.bat : référence .vbs supprimée → GESTION.bat.
+  - service-paiesage.js : message Task 93 mis à jour (ARRETER-WINDOWS.bat
+  puis DEMARRER-TOUT-WINDOWS.bat ; bash ARRETER-LINUX-MAC.sh puis
+  bash DEMARRER-TOUT-LINUX-MAC.sh) — l'ancien message citait des .vbs
+  supprimés et un SECURISER-INSCRIPTION-WINDOWS.bat inexistant.
+
+5. NETTOYAGE : 20 FICHIERS SUPPRIMÉS (racine : 28 → 13 scripts)
+---------------------------------------------------------------
+  Supprimés (redondants/inutiles) : DEMARRER-WINDOWS.bat,
+  DEMARRER-PORTAIL-WINDOWS.bat, DEMARRER-LINUX-MAC.sh,
+  DEMARRER-PORTAIL-LINUX-MAC.sh, DEMARRER-SILENCIEUX-WINDOWS.vbs,
+  DEMARRER-SILENCIEUX-LINUX-MAC.sh, ARRETER-SILENCIEUX-WINDOWS.vbs,
+  ARRETER-SILENCIEUX-LINUX-MAC.sh, ETAT-SILENCIEUX-WINDOWS.vbs,
+  ETAT-SILENCIEUX-LINUX-MAC.sh, JOURNAUX-SILENCIEUX-WINDOWS.vbs,
+  JOURNAUX-SILENCIEUX-LINUX-MAC.sh, PREPARER-PAIESAGE-SILENCIEUX.bat,
+  PREPARER-SERVICE-RH-SILENCIEUX.bat (ancienne marque),
+  INSTALLER-DEMARRAGE-AUTOMATIQUE-WINDOWS.vbs (démarrage auto à la
+  session, dépendait des .vbs supprimés), scripts/service-rh.js
+  (ancien moteur, remplacé par service-paiesage.js),
+  scripts/creer_zip_livrable.sh (packaging obsolète), et 3 tests
+  assertant les fichiers supprimés (test_v02203_silencieux.js,
+  test_v02204_fix_vbs.js, test_v02205_guide_pdf.js).
+  Conservés : DEMARRER-TOUT-* (les 2 OS), INSTALLER-ET-DEMARRER-LINUX-MAC.sh,
+  ARRETER-* (les 2 OS), GESTION.bat + gestion.sh + gestion.ps1,
+  CREER-SUPERADMIN-* (les 2 OS), SAUVEGARDER-BD-WINDOWS.bat,
+  CHIFFRER-FICHES-WINDOWS.bat, SECURISER-DOSSIER-LINUX-MAC.sh.
+  Mode silencieux conservé VIA LA CONSOLE : GESTION.bat demarrer-silencieux
+  / bash gestion.sh demarrer-silencieux (moteur service-paiesage.js).
+  Références croisées mises à jour dans : securiser-auto.js,
+  sauvegarde-bd.js, chiffrer-base.js, reparer-cle-chiffrement.js,
+  pont-preview-3000.js, reparer_cles_env.js, portail-server.js
+  (message utilisateur), verifier-extraction.js.
+
+6. GUIDE (HTML + PDF re-rendu + TXT)
+------------------------------------
+  - Chapitre 2 (Windows) : carte « Modes de démarrage » réécrite
+  (lanceur unique + console) ; chapitre 5 : deux tableaux des lanceurs
+  refaits avec l'inventaire 0.2.212, intro deux modes (fenêtres /
+  silencieux console) ; chapitre 6 : ligne ARRETER-SILENCIEUX retirée
+  du tableau ; chapitre 8 : procédure renumérotée 1-4, arrêt préalable
+  devenu facultatif, migration automatique expliquée (migrer-ports.js),
+  consigne « utilisez les NOUVEAUX liens, fermez les anciens onglets » ;
+  versions 0.2.210 → 0.2.212 (couverture, chapitre 1, ZIP, pied de page).
+  - PDF re-rendu via Chromium headless (13 pages A4, vérifié visuellement :
+  couverture, tables alignées, chapitre 8, récapitulatif).
+  - GUIDE-INSTALLATION-LINUX-WINDOWS.txt : sections Windows/Linux,
+  changement de port et dépannage EADDRINUSE réécrites.
+
+7. VERSIONS
+-----------
+  package.json et VERSION : 0.2.212.
+
+8. VALIDATION (Linux)
+---------------------
+  - migrer-ports.js unitaire : instance factice sur le port 4050 +
+  fichier PID → détectée, arrêtée, port libéré, fichier PID nettoyé ;
+  - scénario complet corrigé : serveurs en marche sur 4000/4001 (moteur),
+  .env → 4040/4041, bash DEMARRER-TOUT-LINUX-MAC.sh → « ancienne
+  configuration détectée », 2 anciennes instances arrêtées, démarrage
+  sur 4040/4041 ; 4000/4001 LIBRES après (plus d'orphelins) ;
+  - bash gestion.sh etat : administration=4040, portail=4041, EN
+  FONCTIONNEMENT ;
+  - retour : .env → 4000/4001 + bash gestion.sh redemarrer → serveurs
+  sur 4000/4001, ancien 4040 libéré ;
+  - syntaxes bash des 6 scripts .sh vérifiées ; node --check sur les
+  JS modifiés ; parenthèses absentes des echo/REM du .bat Windows
+  (non exécutable ici).
+
+VERSION : 0.2.212 (migration automatique des ports + lanceurs autonomes
++ nettoyage de 20 fichiers — aucune logique applicative ni schéma modifié).
+
+
+
